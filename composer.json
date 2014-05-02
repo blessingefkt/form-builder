@@ -1,5 +1,5 @@
 {
-    "name": "flynsarmy/form-builder",
+    "name": "iyoworks/form-builder",
     "keywords": ["laravel", "form", "builder"],
     "license": "MIT",
     "description": "A flexible form builder which utilizes Laravel's Form facade.",
@@ -18,7 +18,7 @@
     "require": {
         "php": ">=5.3.0",
         "illuminate/support": "4.1.*",
-        "laravel/laravel": "4.*"
+        "illuminate/html": "4.1.*"
     },
     "require-dev": {
         "orchestra/testbench": "2.1.*",

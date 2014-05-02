@@ -11,6 +11,11 @@ class FormBuilderServiceProvider extends ServiceProvider {
 	 */
 	protected $defer = false;
 
+    public function boot()
+    {
+        Element::setFormBuilder($this->app['form']);
+    }
+
 	/**
 	 * Register the service provider.
 	 *

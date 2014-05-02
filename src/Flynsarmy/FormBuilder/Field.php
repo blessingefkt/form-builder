@@ -2,11 +2,9 @@
 
 use Flynsarmy\FormBuilder\Exceptions\UnknownType;
 
-class Field
+class Field extends Element
 {
 	protected $id;
-	protected $type;
-	protected $args = array();
 	protected $settings = array();
 
 	/**
