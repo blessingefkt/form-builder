@@ -9,6 +9,7 @@ class FormBuilderManager
     use Traits\Bindable;
     protected $renderers = [], $resolvedRenderers = [];
     protected $macros = [];
+    protected $macroInitializers = [];
     protected $defaultRenderer = null;
 
     /**
@@ -42,17 +43,24 @@ class FormBuilderManager
         if (!$this->isMacro($type))
             throw new FieldNotFound($type);
         $macro = $this->macros[$type];
+        if ($init = $this->macroInitializers[$type])
+        {
+            call_user_func($init);
+            $this->macroInitializers[$type] = false;
+        }
         return call_user_func($macro, $field, $renderer);
     }
 
     /**
-     * @param $name
-     * @param $callable
-     * @return bool
+     * @param string $name
+     * @param callable $callable            the function that renders the field
+     * @param callable $initializeCallback  called the first time the macro is used
+     *                                      this is ideal for loading assets
      */
-    public function addMacro($name, $callable)
+    public function addMacro($name, $callable, callable $initializeCallback = null)
     {
         $this->macros[$name] = $callable;
+        $this->macroInitializers[$name] = $initializeCallback;
     }
 
     /**
