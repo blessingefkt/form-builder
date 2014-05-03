@@ -18,6 +18,13 @@ interface BinderInterface {
     public function afterForm(Form $form);
 
     /**
+     * Add a callback that triggers right after a field is created
+     * @param Field $field
+     * @return mixed
+     */
+    public function newField(Field $field);
+
+    /**
      * Add a callback that triggers before every field is rendered
      * @param Form $form
      * @param Field $field

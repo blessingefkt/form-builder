@@ -1,6 +1,5 @@
 <?php namespace Flynsarmy\FormBuilder\Traits;
 
-use Closure;
 use Flynsarmy\FormBuilder\BinderInterface;
 
 trait Bindable
@@ -15,6 +14,7 @@ trait Bindable
     public function addBinder(BinderInterface $binder)
     {
         $class = get_class($binder);
+        $this->bind('newField', [$binder, 'newField'], $class);
         $this->bind('beforeField', [$binder, 'beforeField'], $class);
         $this->bind('afterField', [$binder, 'afterField'], $class);
         $this->bind('beforeRow', [$binder, 'beforeRow'], $class);

@@ -1,11 +1,10 @@
 <?php namespace Flynsarmy\FormBuilder;
 
-use Flynsarmy\FormBuilder\Exceptions\UnknownType;
 use Illuminate\Support\Str;
 
 /**
  * Class Field
- * @property string $id
+ * @property string $slug
  * @property string $type
  * @property string $value
  */
@@ -23,15 +22,15 @@ class Field extends Element
     /**
      * Creates a new form field.
      *
-     * @param array $id
+     * @param array $slug
      * @param string $type
      * @param string|null $value
      * @param array $attributes
      */
-	public function __construct($id, $type, $value = null, array $attributes = [])
+	public function __construct($slug, $type, $value = null, array $attributes = [])
 	{
         parent::__construct($attributes);
-        $this->id = $id;
+        $this->slug = $slug;
         $this->type($type);
         $this->value($value);
     }
@@ -71,7 +70,7 @@ class Field extends Element
     {
         if (method_exists($this, $method = 'onSet'.Str::studly($key)))
             $this->{$method}($value);
-        elseif ( in_array($key, array('id', 'type', 'value')) )
+        elseif ( in_array($key, array('slug', 'type', 'value')) )
              $this->$key = $value;
         else
         {
@@ -92,7 +91,7 @@ class Field extends Element
      */
     public function get($key, $default = null)
     {
-        if ( in_array($key, array('id', 'type', 'value')) )
+        if ( in_array($key, array('slug', 'type', 'value')) )
             return $this->$key;
 
         if ($this->isProperty($key))

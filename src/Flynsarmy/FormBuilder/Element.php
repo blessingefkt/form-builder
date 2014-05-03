@@ -1,8 +1,5 @@
 <?php namespace Flynsarmy\FormBuilder;
 
-use Flynsarmy\FormBuilder\Exceptions\UnknownType;
-use Illuminate\Html\FormBuilder;
-
 /**
  * Class Element
  */

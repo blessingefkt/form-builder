@@ -238,6 +238,7 @@ class Form extends Element
 
     /**
      * Add a new field to the form at a given position
+     * binders: newField, new{Fieldtype}Field
      *
      * @param  integer $position     Array index position to add the field
      * @param  string  $slug           Unique identifier for this field
@@ -250,7 +251,9 @@ class Form extends Element
         $field = new Field($slug, $type);
         $field->mergeAttributes($this->fieldAttributeBuffer);
         $field->appendProperties($this->fieldPropertyBuffer);
-        $this->fields = ArrayHelper::insert($this->fields, [$slug => $field], $position);
+        $this->fire('newField', $field);
+        $this->fire('new'.Str::studly($field->type).'Field', $field);
+        $this->fields = ArrayHelper::insert($this->fields, [$field->slug => $field], $position);
         return $field;
     }
 
@@ -448,7 +451,7 @@ class Form extends Element
         $output = '';
 
         if ($this->enableAutoLabels && !$field->label)
-            $field->label = Str::title($field->id);
+            $field->label = Str::title($field->slug);
         if ($this->fieldNames)
             $field->addName($this->fieldNames, true);
 
