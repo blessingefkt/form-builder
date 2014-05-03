@@ -3,36 +3,111 @@
 use Flynsarmy\FormBuilder\Exceptions\UnknownType;
 use Illuminate\Html\FormBuilder;
 
+/**
+ * Class Element
+ */
 class Element {
-    protected $type;
-    protected $args = array();
+    protected $attributes = array();
 
-    /**
-     * @var \Illuminate\Html\FormBuilder
-     */
-    protected static $formBuilder;
-
-    /**
-     * @param \Illuminate\Html\FormBuilder $formBuilder
-     */
-    public static function setFormBuilder($formBuilder)
+    public function __construct(array $attributes = [])
     {
-        self::$formBuilder = $formBuilder;
+        $this->attributes = $attributes;
     }
 
     /**
-     * @return \Illuminate\Html\FormBuilder
+     * @param array $attributes
+     * @return $this
      */
-    public static function getFormBuilder()
+    public function mergeAttributes(array $attributes)
     {
-        return self::$formBuilder;
+        $this->attributes = array_merge_recursive($this->attributes, $attributes);
+        return $this;
     }
 
-    public function render()
+    /**
+     * @param $key
+     * @param null $default
+     * @return mixed
+     */
+    public function getAttr($key, $default = null)
     {
-        if ( !$this->type )
-            throw new UnknownType("You must set a field type for an element");
-
-        return call_user_func_array(array(static::$formBuilder, $this->type), $this->args);
+        if (array_key_exists($key, $this->attributes))
+            $value = $this->attributes[$key];
+        else
+            $value = $default;
+        return value($value);
     }
-} 
+
+    /**
+     *
+     * @param $key
+     * @param $value
+     * @return $this
+     */
+    public function setAttr($key, $value)
+    {
+        $this->attributes[$key] = $value;
+        return $this;
+    }
+
+    /**
+     * Add a class
+     * @param $class
+     * @return $this
+     */
+    public function addClass($class)
+    {
+        if (is_array($class))
+        {
+            array_map([$this, 'addClass'], $class);
+        }
+        else
+        {
+            $classes = (array) array_get($this->attributes, 'class', []);
+            if (!is_array($class))
+                $class = explode(' ', $class);
+            $classes = array_merge($classes, $class);
+            $this->attributes['class'] = array_unique($classes);
+        }
+        return $this;
+    }
+
+    /**
+     * Remove a class
+     * @param $class
+     * @return $this
+     */
+    public function removeClass($class)
+    {
+        if (is_array($class))
+        {
+            array_map([$this, 'removeClass'], $class);
+        }
+        else
+        {
+            $classes = (array) array_get($this->attributes, 'class', []);
+            if ($key = array_search($class, $classes))
+            {
+                unset($classes[$key]);
+            }
+            $this->attributes['class'] = $classes;
+        }
+        return $this;
+    }
+
+    /**
+     * @param array $attributes
+     */
+    public function setAttributes($attributes)
+    {
+        $this->attributes = $attributes;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAttributes()
+    {
+        return $this->attributes;
+    }
+}

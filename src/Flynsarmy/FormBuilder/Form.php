@@ -1,53 +1,76 @@
 <?php namespace Flynsarmy\FormBuilder;
 
 use Closure;
-use Flynsarmy\FormBuilder\Field;
 use Flynsarmy\FormBuilder\Exceptions\FieldAlreadyExists;
 use Flynsarmy\FormBuilder\Exceptions\FieldNotFound;
 use Flynsarmy\FormBuilder\Helpers\ArrayHelper;
-
-class Form
+/**
+ * Class Form
+ * @property string $model
+ * @property string $actionType
+ * @property string $action
+ * @property array $fieldNames
+ */
+class Form extends Element
 {
     use Traits\Bindable;
 
-    protected $fields = array();
-    protected $action;
-    protected $actionType;
+    /**
+     * @var FormBuilderManager
+     */
+    private $manager;
+    /**
+     * @var FormRenderer
+     */
+    protected $_renderer;
+    /**
+     * @var \stdClass
+     */
     protected $model;
+    /**
+     * @var array
+     */
+    protected $fields = [], $fieldNames = [];
+    /**
+     * @var string
+     */
+    protected $action, $actionType, $rendererName;
 
     /**
-     * Set the form's model and render the opening tag
-     * @param $model
-     * @param array $options
-     * @return mixed
+     * @param FormBuilderManager $manager
+     * @param string $rendererName
      */
-    public function model($model, array $options = array())
+    public function __construct(FormBuilderManager $manager, $rendererName, array $attributes = [])
     {
-        $this->model = $model;
-        return $this->open($options);
+        parent::__construct($attributes);
+        $this->manager = $manager;
+        $this->rendererName = $rendererName;
+    }
+
+
+    /**
+     * @return FormRenderer
+     */
+    public function renderer()
+    {
+        if (!$this->_renderer)
+        {
+            $rendererCallback = $this->manager->getRenderer($this->rendererName);
+            $this->_renderer =  call_user_func($rendererCallback, $this);
+        }
+        return $this->_renderer;
     }
 
     /**
-     * Render to form's opening tag
-     * @param array $options
-     * @return string
+     * Add a name to prepend to every field's name.
+     * EX: <input name='$name[some_field]'>, <input name='$name[another_name][some_field]'>
+     * @param string|dynamic $name
+     * @return $this
      */
-    public function open(array $options = array())
+    public function addFieldName($name)
     {
-        if ($this->actionType)
-            $options[$this->actionType] = $this->action;
-
-        if ($this->model) return Element::getFormBuilder()->model($this->model, $options);
-        return Element::getFormBuilder()->open($options);
-    }
-
-    /**
-     * Render the form's closing tag
-     * @return string
-     */
-    public function close()
-    {
-        return Element::getFormBuilder()->close();
+        $this->fieldNames = array_merge($this->fieldNames, func_get_args());
+        return $this;
     }
 
     /**
@@ -73,7 +96,7 @@ class Form
     /**
      * Set the form's action attribute
      * @param $action
-     * @param string $actionType  supported options: url,action,route
+     * @param string $actionType examples: url,action,route
      * @return $this
      */
     public function url($action, $actionType = 'url')
@@ -130,30 +153,35 @@ class Form
     /**
      * Add a new field to the form
      *
-     * @param  string  $id        Unique identifier for this field
-     * @param  Closure $callback  Optional closure accepting a Field object
+     * @param  string $id Unique identifier for this field
+     * @param  string $type Type of field
+     * @param  Closure $callback Optional closure accepting a Field object
      *
+     * @throws Exceptions\FieldAlreadyExists
      * @return mixed   Instance of Form if callback is specified, else instance of Field
      */
-    public function add($id, $callback = null)
+    public function add($id, $type, $callback = null)
     {
         if ( isset($this->fields[$id]) )
             throw new FieldAlreadyExists("Field with id '$id' has already been added to this form.");
 
-        return $this->addAtPosition(sizeof($this->fields), $id, $callback);
+        return $this->addAtPosition(sizeof($this->fields), $id, $type, $callback);
     }
 
     /**
      * Add a new field to the form
      *
-     * @param  string  $existingId   ID of field to insert before
-     * @param  string  $id           Unique identifier for this field
-     * @param  Closure $callback     Optional closure accepting a Field object
+     * @param  string $existingId ID of field to insert before
+     * @param  string $id Unique identifier for this field
+     * @param  string $type Type of field
+     * @param  Closure $callback Optional closure accepting a Field object
      *
+     * @throws Exceptions\FieldNotFound
+     * @throws Exceptions\FieldAlreadyExists
      * @return mixed                 Instance of Form if callback is specified,
      *                               else instance of Field
      */
-    public function addBefore($existingId, $id, $callback = null)
+    public function addBefore($existingId, $id, $type, $callback = null)
     {
         $keyPosition = ArrayHelper::getKeyPosition($this->fields, $existingId);
         if ( $keyPosition == -1 )
@@ -162,20 +190,23 @@ class Form
         if ( isset($this->fields[$id]) )
             throw new FieldAlreadyExists("Field with id '$id' has already been added to this form.");
 
-        return $this->addAtPosition($keyPosition, $id, $callback);
+        return $this->addAtPosition($keyPosition, $id, $type, $callback);
     }
 
     /**
      * Add a new field to the form
      *
-     * @param  string  $existingId   ID of field to insert after
-     * @param  string  $id           Unique identifier for this field
-     * @param  Closure $callback     Optional closure accepting a Field object
+     * @param  string $existingId ID of field to insert after
+     * @param  string $id Unique identifier for this field
+     * @param  string $type Type of field
+     * @param  Closure $callback Optional closure accepting a Field object
      *
+     * @throws Exceptions\FieldNotFound
+     * @throws Exceptions\FieldAlreadyExists
      * @return mixed                 Instance of Form if callback is specified,
      *                               else instance of Field
      */
-    public function addAfter($existingId, $id, $callback = null)
+    public function addAfter($existingId, $id, $type, $callback = null)
     {
         $keyPosition = ArrayHelper::getKeyPosition($this->fields, $existingId);
         if ( $keyPosition == -1 )
@@ -184,7 +215,7 @@ class Form
         if ( isset($this->fields[$id]) )
             throw new FieldAlreadyExists("Field with id '$id' has already been added to this form.");
 
-        return $this->addAtPosition(++$keyPosition, $id, $callback);
+        return $this->addAtPosition(++$keyPosition, $id, $type, $callback);
     }
 
     /**
@@ -192,14 +223,15 @@ class Form
      *
      * @param  integer $position     Array index position to add the field
      * @param  string  $id           Unique identifier for this field
+     * @param  string $type          Type of field
      * @param  Closure $callback     Optional closure accepting a Field object
      *
      * @return mixed                 Instance of Form if callback is specified,
      *                               else instance of Field
      */
-    protected function addAtPosition($position, $id, $callback = null)
+    protected function addAtPosition($position, $id, $type, $callback = null)
     {
-        $field = new Field($id);
+        $field = new Field($id, $type);
         $this->fields = ArrayHelper::insert($this->fields, [$id => $field], $position);
 
         if ( $callback instanceof Closure )
@@ -216,7 +248,7 @@ class Form
      *
      * @param  string $id     Unique identifier for the field
      *
-     * @return Flynsarmy\FormBuilder\Field
+     * @return \Flynsarmy\FormBuilder\Field
      */
     public function get($id)
     {
@@ -231,7 +263,7 @@ class Form
      *
      * @param  string $id     Unique identifier for the field
      *
-     * @return Flynsarmy\FormBuilder\Form
+     * @return \Flynsarmy\FormBuilder\Form
      */
     public function remove($id)
     {
@@ -241,6 +273,38 @@ class Form
         unset($this->fields[$id]);
 
         return $this;
+    }
+
+    /**
+     * Set the form's model and render the opening tag
+     * @param $model
+     * @param array $attributes
+     * @return string
+     */
+    public function model($model, array $attributes = array())
+    {
+        $this->model = $model;
+        return $this->open($attributes);
+    }
+
+    /**
+     * Render to form's opening tag
+     * @param array $attributes
+     * @return string
+     */
+    public function open(array $attributes = array())
+    {
+        $this->mergeAttributes($attributes);
+        return $this->renderer()->renderFormOpen($this);
+    }
+
+    /**
+     * Render the form's closing tag
+     * @return string
+     */
+    public function close()
+    {
+        return $this->renderer()->renderFormClose($this);
     }
 
     /**
@@ -254,7 +318,7 @@ class Form
         // Are we using a tabbed interface?
         $tabs = $this->getFieldsBySetting('tab', '');
 
-        $output .= $this->fire('beforeForm', $form, $tabs);
+        $output .= $this->fire('beforeForm', $this, $tabs);
 
         // Render a tabless form
         if ( sizeof($tabs) == 1 )
@@ -267,7 +331,7 @@ class Form
                 $output .= $this->renderFields($fields);
         }
 
-        $output .= $this->fire('afterForm', $form, $tabs);
+        $output .= $this->fire('afterForm', $this, $tabs);
 
         return $output;
     }
@@ -328,13 +392,22 @@ class Form
      *
      * @return string
      */
-    protected function renderField(Field $field)
+    public  function renderField(Field $field)
     {
         $output = '';
-        $output .= $this->fire('beforeField', $form, $field);
-        $output .= $field->render();
-        $output .= $this->fire('afterField', $form, $field);
+        $output .= $this->fire('beforeField', $this, $field);
+
+        if ($this->fieldNames)
+            $field->addName($this->fieldNames, true);
+
+        if ($this->manager->isMacro($field->type))
+            $output .= $this->manager->callMacro($field->type, $field, $this->render());
+        else
+            $output .= $this->renderer()->renderField($field);
+
+        $output .= $this->fire('afterField', $this, $field);
 
         return $output;
     }
+
 }

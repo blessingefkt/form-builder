@@ -1,6 +1,6 @@
 <?php namespace Flynsarmy\FormBuilder\Exceptions;
 
-class FieldAlreadyExists extends \Exception
+class RendererNotFound extends \Exception
 {
 
 }

@@ -1,64 +1,233 @@
 <?php namespace Flynsarmy\FormBuilder;
 
 use Flynsarmy\FormBuilder\Exceptions\UnknownType;
+use Illuminate\Support\Str;
 
+/**
+ * Class Field
+ * @property string $id
+ * @property string $type
+ * @property string $value
+ */
 class Field extends Element
 {
 	protected $id;
-	protected $settings = array();
+    protected $type;
+    protected $value;
+    protected $properties = array();
 
-	/**
-	 * Creates a new form field.
-	 *
-	 * @param Form   $form Form this field belongs to
-	 * @param [type] $id   Unique identifier for the field
-	 */
-	public function __construct($id)
+    /**
+     * Creates a new form field.
+     *
+     * @param array $id
+     * @param null $value
+     * @param array $attributes
+     */
+	public function __construct($id, $type, $value = null, array $attributes = [])
 	{
-		$this->id = $id;
-	}
+        parent::__construct($attributes);
+        $this->id = $id;
+        $this->type($type);
+        $this->value($value);
+    }
 
-	/**
-	 * Set the field type.
-	 *
-	 * @param  string $type   Accepts any field type/macro the Form facade supports.
-	 *
-	 * @return Flynsarmy\FormBuilder\Field
-	 */
-	public function type($type)
-	{
-		$this->type = $type;
+    /**
+     * Set the field type.
+     *
+     * @param  string $type
+     *
+     * @return \Flynsarmy\FormBuilder\Field
+     */
+    public function type($type)
+    {
+        $this->type = $type;
+        return $this;
+    }
 
-		return $this;
-	}
+    /**
+     * Set the field value.
+     *
+     * @param  string $value
+     *
+     * @return \Flynsarmy\FormBuilder\Field
+     */
+    public function value($value)
+    {
+        $this->type = $value;
+        return $this;
+    }
 
-	/**
-	 * Set the field type.
-	 *
-	 * @param  splat $args   Any arguments the Form::$type() method requires.
-	 *
-	 * @return Flynsarmy\FormBuilder\Field
-	 */
-	public function with()
-	{
-		$this->args = func_get_args();
+    /**
+     * Get an attribute from the container.
+     *
+     * @param  string  $key
+     * @param  mixed   $default
+     * @return mixed
+     */
+    public function get($key, $default = null)
+    {
+        if ( in_array($key, array('id', 'type', 'value')) )
+            return $this->$key;
 
-		return $this;
-	}
+        if ($this->isProperty($key))
+            $value = $this->getProperty($key, $default);
+        else
+            $value = $this->getAttr($key, $default);
 
-	/**
-	 * Use the Form facade to render the field based on the type and arguments
-	 * provided.
-	 *
-	 * @return string
-	 */
-	public function render()
-	{
-		if ( !$this->type )
-			throw new UnknownType("You must set a field type for field '".$this->id."'.");
+        if (method_exists($this, $method = 'onGet'.Str::studly($key)))
+            return $this->{$method}($value ?: $default);
 
-		return forward_static_call_array(array('Form', $this->type), $this->args);
-	}
+        return $value;
+    }
+
+    /**
+     * @param array $properties
+     * @return $this
+     */
+    public function setProperties(array $properties)
+    {
+        foreach ($properties as $name => $value)
+        {
+            $this->setProperty($name, $value);
+        }
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getProperties()
+    {
+        return $this->properties;
+    }
+
+    /**
+     * @param $name
+     * @param $value
+     * @return $this
+     */
+    public function setProperty($name, $value)
+    {
+        $this->properties[$name] = $value;
+        return $this;
+    }
+    /**
+     * @param $name
+     * @param mixed $default
+     * @return mixed
+     */
+    public function getProperty($name, $default = null)
+    {
+        if (!$this->hasProperty($name)) return $default;
+        $value = $this->properties[$name];
+        return value($value);
+    }
+
+    /**
+     * @param $name
+     * @return $this
+     */
+    public function removeProperty($name)
+    {
+        unset($this->properties[$name]);
+        return $this;
+    }
+
+    /**
+     * @param $key
+     * @return bool
+     */
+    public function isProperty($key)
+    {
+        return array_key_exists($key, $this->properties);
+    }
+
+    /**
+     * @param $key
+     * @return bool
+     */
+    public function hasProperty($key)
+    {
+        return isset($this->properties[$key]);
+    }
+
+    /**
+     * @param mixed $value
+     * @param bool $onTop
+     * @return $this
+     */
+    public function addName($value, $onTop = false)
+    {
+        $names = $this->getProperty('baseNames');
+        if ($names !== false)
+        {
+            $values = (array) $value;
+            foreach ($values as $value)
+            {
+                if ($onTop)
+                    array_unshift($names, $value);
+                else
+                    array_push($names, $value);
+            }
+            $this->setProperty('baseNames', $names);
+        }
+        return $this;
+    }
+
+    /**
+     * @param $value
+     * @return string
+     */
+    public function onGetName($value)
+    {
+        if ($value === false)
+            return null;
+        if (is_null($value))
+            $value = $this->getProperty('slug');
+        $baseNames = $this->getProperty('baseNames');
+        if ($baseNames === false) $baseNames = [];
+        return $value = $this->makeFieldName($value, $baseNames, $this->multiple);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function safeName()
+    {
+        return str_replace(array('.', '[]', '[', ']'), array('_', '', '.', ''), $this->name);
+    }
+
+    /**
+     * @param $name
+     * @param $baseNames
+     * @param $multiple
+     * @return string
+     */
+    protected function makeFieldName($name, $baseNames, $multiple)
+    {
+        $baseNames = (array) $baseNames;
+        $baseNames[] = $name;
+        $name = null;
+        foreach ($baseNames as $_name) {
+            if (!$name)
+            {
+                if ($_name === false)
+                    $name = -1;
+                else
+                    $name = $_name;
+            }
+            elseif($name == -1)
+            {
+                $name = $_name;
+                break;
+            }
+            else
+                $name .= '['.$_name.']';
+        }
+
+        if ($multiple) return $name.'[]';
+        return $name;
+    }
 
 	/**
 	 * Return a setting if it exists
@@ -69,14 +238,8 @@ class Field extends Element
 	 */
 	public function __get($name)
 	{
-		if ( in_array($name, array('id', 'type', 'settings')) )
-			return $this->$name;
-
-		if ( isset($this->settings[$name]) )
-			return $this->settings[$name];
-
-		return null;
-	}
+        return $this->get($name);
+    }
 
 	/**
 	 * Lets us add custom field settings to be used during the render process.
@@ -92,11 +255,11 @@ class Field extends Element
 			return call_user_func_array(array($this, $name), $arguments);
 
 		if ( !sizeof($arguments) )
-			$this->settings[$name] = true;
+			$this->properties[$name] = true;
 		elseif ( sizeof($arguments) == 1 )
-			$this->settings[$name] = $arguments[0];
+			$this->properties[$name] = $arguments[0];
 		else
-			$this->settings[$name] = $arguments;
+			$this->properties[$name] = $arguments;
 
 		return $this;
 	}
