@@ -53,7 +53,7 @@ class Field extends Element
      */
     public function value($value)
     {
-        $this->type = $value;
+        $this->value = $value;
         return $this;
     }
 

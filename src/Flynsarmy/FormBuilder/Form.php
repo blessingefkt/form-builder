@@ -155,17 +155,16 @@ class Form extends Element
      *
      * @param  string $id Unique identifier for this field
      * @param  string $type Type of field
-     * @param  Closure $callback Optional closure accepting a Field object
      *
      * @throws Exceptions\FieldAlreadyExists
-     * @return mixed   Instance of Form if callback is specified, else instance of Field
+     * @return \Flynsarmy\FormBuilder\Field
      */
-    public function add($id, $type, $callback = null)
+    public function add($id, $type)
     {
         if ( isset($this->fields[$id]) )
             throw new FieldAlreadyExists("Field with id '$id' has already been added to this form.");
 
-        return $this->addAtPosition(sizeof($this->fields), $id, $type, $callback);
+        return $this->addAtPosition(sizeof($this->fields), $id, $type);
     }
 
     /**
@@ -174,14 +173,12 @@ class Form extends Element
      * @param  string $existingId ID of field to insert before
      * @param  string $id Unique identifier for this field
      * @param  string $type Type of field
-     * @param  Closure $callback Optional closure accepting a Field object
      *
      * @throws Exceptions\FieldNotFound
      * @throws Exceptions\FieldAlreadyExists
-     * @return mixed                 Instance of Form if callback is specified,
-     *                               else instance of Field
+     * @return \Flynsarmy\FormBuilder\Field
      */
-    public function addBefore($existingId, $id, $type, $callback = null)
+    public function addBefore($existingId, $id, $type)
     {
         $keyPosition = ArrayHelper::getKeyPosition($this->fields, $existingId);
         if ( $keyPosition == -1 )
@@ -190,7 +187,7 @@ class Form extends Element
         if ( isset($this->fields[$id]) )
             throw new FieldAlreadyExists("Field with id '$id' has already been added to this form.");
 
-        return $this->addAtPosition($keyPosition, $id, $type, $callback);
+        return $this->addAtPosition($keyPosition, $id, $type);
     }
 
     /**
@@ -199,14 +196,13 @@ class Form extends Element
      * @param  string $existingId ID of field to insert after
      * @param  string $id Unique identifier for this field
      * @param  string $type Type of field
-     * @param  Closure $callback Optional closure accepting a Field object
      *
      * @throws Exceptions\FieldNotFound
      * @throws Exceptions\FieldAlreadyExists
-     * @return mixed                 Instance of Form if callback is specified,
-     *                               else instance of Field
+     * @return \Flynsarmy\FormBuilder\Field
+     *
      */
-    public function addAfter($existingId, $id, $type, $callback = null)
+    public function addAfter($existingId, $id, $type)
     {
         $keyPosition = ArrayHelper::getKeyPosition($this->fields, $existingId);
         if ( $keyPosition == -1 )
@@ -215,7 +211,7 @@ class Form extends Element
         if ( isset($this->fields[$id]) )
             throw new FieldAlreadyExists("Field with id '$id' has already been added to this form.");
 
-        return $this->addAtPosition(++$keyPosition, $id, $type, $callback);
+        return $this->addAtPosition(++$keyPosition, $id, $type);
     }
 
     /**
@@ -224,22 +220,13 @@ class Form extends Element
      * @param  integer $position     Array index position to add the field
      * @param  string  $id           Unique identifier for this field
      * @param  string $type          Type of field
-     * @param  Closure $callback     Optional closure accepting a Field object
      *
-     * @return mixed                 Instance of Form if callback is specified,
-     *                               else instance of Field
+     * @return \Flynsarmy\FormBuilder\Field
      */
-    protected function addAtPosition($position, $id, $type, $callback = null)
+    protected function addAtPosition($position, $id, $type)
     {
         $field = new Field($id, $type);
         $this->fields = ArrayHelper::insert($this->fields, [$id => $field], $position);
-
-        if ( $callback instanceof Closure )
-        {
-            call_user_func($callback, $field);
-            return $this;
-        }
-
         return $field;
     }
 
