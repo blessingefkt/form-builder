@@ -56,7 +56,7 @@ class Form extends Element
         if (!$this->_renderer)
         {
             $rendererCallback = $this->manager->getRenderer($this->rendererName);
-            $this->_renderer =  call_user_func($rendererCallback, $this);
+            $this->_renderer =  call_user_func($rendererCallback);
         }
         return $this->_renderer;
     }

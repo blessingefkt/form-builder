@@ -13,7 +13,13 @@ class FormBuilderServiceProvider extends ServiceProvider {
 
     public function boot()
     {
-        Element::setFormBuilder($this->app['form']);
+        /** @var FormBuilderManager $formBuilder */
+        $formBuilder = $this->app['formbuilder'];
+        $formBuilder->addRenderer('laravel', function()
+        {
+           return new LaravelFormRenderer($this->app['form']);
+        });
+        $formBuilder->setDefaultRenderer('laravel');
     }
 
 	/**
@@ -23,7 +29,10 @@ class FormBuilderServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		$this->app->bind('formbuilder', 'Flynsarmy\FormBuilder\FormBuilderManager');
+		$this->app->bindShared('formbuilder', function()
+        {
+            return new FormBuilderManager();
+        });
 	}
 
 	/**

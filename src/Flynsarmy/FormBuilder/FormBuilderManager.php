@@ -14,8 +14,8 @@ class FormBuilderManager
     /**
      * Create a new Form
      *
-     * @param  Closure $callback   Optional closure accepting a Form object
-     *
+     * @param  Closure $callback Optional closure accepting a Form object
+     * @param string $renderer
      * @return \Flynsarmy\FormBuilder\Form
      */
     public function form(callable $callback = null, $renderer = null)
@@ -64,6 +64,10 @@ class FormBuilderManager
         return isset($this->macros[$name]);
     }
 
+    /**
+     * @param $name
+     * @param callable $callback
+     */
     public function addRenderer($name, \Closure $callback)
     {
         $this->renderers[$name] = $callback;
