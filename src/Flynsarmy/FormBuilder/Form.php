@@ -48,7 +48,7 @@ class Form extends Element
      * @var string
      */
     protected $action, $actionType, $rendererName;
-    protected $enableAutoLabels = true;
+    protected $autoLabels = true;
 
     /**
      * @param FormBuilderManager $manager
@@ -449,8 +449,8 @@ class Form extends Element
     {
         $output = '';
 
-        if ($this->enableAutoLabels && !$field->label)
-            $field->label = Str::title($field->slug);
+        if ($this->autoLabels && !$field->label)
+            $field->label = Str::title(str_replace('_', ' ', $field->slug));
         if ($this->fieldNames)
             $field->addName($this->fieldNames, true);
 
@@ -614,7 +614,7 @@ class Form extends Element
      */
     public function autoLabels($value = true)
     {
-        $this->enableAutoLabels = (bool) $value;
+        $this->autoLabels = (bool) $value;
         return $this;
     }
 
@@ -623,7 +623,7 @@ class Form extends Element
      */
     public function autoLabelsEnabled()
     {
-        return $this->enableAutoLabels;
+        return $this->autoLabels;
     }
 
     /**
