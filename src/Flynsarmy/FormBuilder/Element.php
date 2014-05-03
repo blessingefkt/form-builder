@@ -108,6 +108,8 @@ class Element {
      */
     public function getAttributes()
     {
-        return $this->attributes;
+        $attributes = $this->attributes;
+        $attributes['class'] = join(' ', array_pull($attributes, 'class', []));
+        return $attributes;
     }
 }
