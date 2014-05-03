@@ -57,6 +57,15 @@ class LaravelFormRenderer implements FormRenderer
      * @param Field $field
      * @return string
      */
+    public function label(Field $field)
+    {
+        return $this->builder->label($field->name, $field->value, $field->getAttributes());
+    }
+
+    /**
+     * @param Field $field
+     * @return string
+     */
     public function input(Field $field)
     {
         return $this->builder->input($field->type, $field->name, $field->value, $field->getAttributes());

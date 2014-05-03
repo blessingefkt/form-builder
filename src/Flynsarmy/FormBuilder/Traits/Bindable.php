@@ -6,7 +6,12 @@ trait Bindable
 {
 	protected $bindings = array();
 
-	public function getBinding($binding, $default=NULL)
+    /**
+     * @param $binding
+     * @param mixed $default
+     * @return array
+     */
+    public function getBinding($binding, $default=NULL)
 	{
 		if ( isset($this->bindings[$binding]))
 			return $this->bindings[$binding];
@@ -14,14 +19,23 @@ trait Bindable
 		return $default;
 	}
 
-	public function bind($event, Closure $callback)
+    /**
+     * @param $event
+     * @param callable $callback
+     * @return $this
+     */
+    public function bind($event, Closure $callback)
 	{
-		$this->bindings[$event] = $callback;
+		$this->bindings[$event][] = $callback;
 
 		return $this;
 	}
 
-	public function unbind($event)
+    /**
+     * @param $event
+     * @return $this
+     */
+    public function unbind($event)
 	{
 		if ( isset($this->bindings[$event]) )
 			unset($this->bindings[$event]);
@@ -29,14 +43,19 @@ trait Bindable
 		return $this;
 	}
 
-	public function fire()
+    /**
+     * @return mixed|string
+     */
+    public function fire()
 	{
 		$args = func_get_args();
 		$event = array_shift($args);
-
+        $output = '';
 		if ( isset($this->bindings[$event]) )
-			return call_user_func_array($this->bindings[$event], $args);
-
-		return '';
+            foreach ($this->bindings[$event] as $callable)
+            {
+                $output .= call_user_func_array($callable, $args);
+            }
+		return $output;
 	}
 }

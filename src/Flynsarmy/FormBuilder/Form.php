@@ -39,6 +39,7 @@ class Form extends Element
     /**
      * @param FormBuilderManager $manager
      * @param string $rendererName
+     * @param array $attributes
      */
     public function __construct(FormBuilderManager $manager, $rendererName, array $attributes = [])
     {
@@ -47,6 +48,14 @@ class Form extends Element
         $this->rendererName = $rendererName;
     }
 
+    public function bindClass(BinderInterface $binder)
+    {
+        $this->bind('beforeField', [$binder, 'beforeField']);
+        $this->bind('afterField', [$binder, 'afterField']);
+        $this->bind('afterForm', [$binder, 'afterForm']);
+        $this->bind('beforeForm', [$binder, 'beforeForm']);
+        return $this;
+    }
 
     /**
      * @return FormRenderer
@@ -233,8 +242,9 @@ class Form extends Element
     /**
      * Retrieve a field with given ID
      *
-     * @param  string $id     Unique identifier for the field
+     * @param  string $id Unique identifier for the field
      *
+     * @throws Exceptions\FieldNotFound
      * @return \Flynsarmy\FormBuilder\Field
      */
     public function get($id)
@@ -248,8 +258,9 @@ class Form extends Element
     /**
      * Remove a field from the form by ID
      *
-     * @param  string $id     Unique identifier for the field
+     * @param  string $id Unique identifier for the field
      *
+     * @throws Exceptions\FieldNotFound
      * @return \Flynsarmy\FormBuilder\Form
      */
     public function remove($id)
