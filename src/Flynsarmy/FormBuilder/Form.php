@@ -12,7 +12,6 @@ use Illuminate\Support\Str;
  * @property string $model
  * @property string $actionType
  * @property string $action
- * @property string $rowTag
  * @property array $fieldNames
  */
 class Form extends Element
@@ -551,6 +550,80 @@ class Form extends Element
     public function getFields()
     {
         return new Collection($this->fields);
+    }
+
+    /**
+     * @return array|string
+     */
+    public function getAction()
+    {
+        return $this->action;
+    }
+
+    /**
+     * @return string
+     */
+    public function getActionType()
+    {
+        return $this->actionType;
+    }
+
+    /**
+     * @return array
+     */
+    public function getFieldNames()
+    {
+        return $this->fieldNames;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getModel()
+    {
+        return $this->model;
+    }
+
+    /**
+     * @return array
+     */
+    public function getFieldAttributeBuffer()
+    {
+        return $this->fieldAttributeBuffer;
+    }
+
+    /**
+     * @return array
+     */
+    public function getFieldPropertyBuffer()
+    {
+        return $this->fieldPropertyBuffer;
+    }
+
+    /**
+     * @return string
+     */
+    public function getRendererName()
+    {
+        return $this->rendererName;
+    }
+
+    /**
+     * @param bool $value
+     * @return $this
+     */
+    public function autoLabels($value = true)
+    {
+        $this->enableAutoLabels = (bool) $value;
+        return $this;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function autoLabelsEnabled()
+    {
+        return $this->enableAutoLabels;
     }
 
     /**

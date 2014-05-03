@@ -40,7 +40,7 @@ class LaravelFormRenderer implements FormRenderer
     {
         $options = $form->getAttributes();
         $options[$form->actionType] = $form->action;
-        if ($model = $form->model)
+        if ($model = $form->getModel())
             return $this->builder->model($model, $options);
         return $this->builder->open($options);
     }
