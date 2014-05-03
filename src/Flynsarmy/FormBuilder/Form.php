@@ -457,7 +457,7 @@ class Form extends Element
         $output .= $this->fire('beforeField', $this, $field);
 
         if ($this->manager->isMacro($field->type))
-            $fieldHtml = $this->manager->callMacro($field->type, $field, $this->render());
+            $fieldHtml = $this->manager->callMacro($field->type, $field, $this->getRenderer());
         else
             $fieldHtml = $this->getRenderer()->field($field);
 
