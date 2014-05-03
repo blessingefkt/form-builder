@@ -48,7 +48,7 @@ class Form extends Element
         $this->rendererName = $rendererName;
     }
 
-    public function bindClass(BinderInterface $binder)
+    public function addBinder(BinderInterface $binder)
     {
         $this->bind('beforeField', [$binder, 'beforeField']);
         $this->bind('afterField', [$binder, 'afterField']);
