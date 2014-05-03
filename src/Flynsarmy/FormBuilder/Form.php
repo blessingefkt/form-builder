@@ -180,7 +180,7 @@ class Form extends Element
      * @throws Exceptions\FieldAlreadyExists
      * @return \Flynsarmy\FormBuilder\Field
      */
-    public function add($slug, $type)
+    public function add($slug, $type = null)
     {
         if ( isset($this->fields[$slug]) )
             throw new FieldAlreadyExists("Field with id '$slug' has already been added to this form.");
@@ -199,7 +199,7 @@ class Form extends Element
      * @throws Exceptions\FieldAlreadyExists
      * @return \Flynsarmy\FormBuilder\Field
      */
-    public function addBefore($existingId, $slug, $type)
+    public function addBefore($existingId, $slug, $type = null)
     {
         $keyPosition = ArrayHelper::getKeyPosition($this->fields, $existingId);
         if ( $keyPosition == -1 )
@@ -223,7 +223,7 @@ class Form extends Element
      * @return \Flynsarmy\FormBuilder\Field
      *
      */
-    public function addAfter($existingId, $slug, $type)
+    public function addAfter($existingId, $slug, $type = null)
     {
         $keyPosition = ArrayHelper::getKeyPosition($this->fields, $existingId);
         if ( $keyPosition == -1 )
@@ -241,13 +241,13 @@ class Form extends Element
      *
      * @param  integer $position     Array index position to add the field
      * @param  string  $slug           Unique identifier for this field
-     * @param  string $type          Type of field
+     * @param  string $type          Type of field, defaults to 'text'
      *
      * @return \Flynsarmy\FormBuilder\Field
      */
-    protected function addAtPosition($position, $slug, $type)
+    protected function addAtPosition($position, $slug, $type = null)
     {
-        $field = new Field($slug, $type);
+        $field = new Field($slug, $type ?: 'text');
         $field->mergeAttributes($this->fieldAttributeBuffer);
         $field->appendProperties($this->fieldPropertyBuffer);
         $this->fire('newField', $field);
