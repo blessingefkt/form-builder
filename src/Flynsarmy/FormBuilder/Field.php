@@ -218,7 +218,7 @@ class Field extends Element
         if ($value === false)
             return null;
         if (is_null($value))
-            $value = $this->getProperty('slug');
+            $value = $this->slug;
         $baseNames = $this->getProperty('baseNames');
         if ($baseNames === false) $baseNames = [];
         return $value = $this->makeFieldName($value, $baseNames, $this->multiple);
