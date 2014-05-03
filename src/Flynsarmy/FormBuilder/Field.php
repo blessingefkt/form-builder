@@ -58,6 +58,27 @@ class Field extends Element
     }
 
     /**
+     * @param $key
+     * @param $value
+     * @return $this
+     */
+    public function set($key, $value)
+    {
+        if (method_exists($this, $method = 'onSet'.Str::studly($key)))
+            $this->{$method}($value);
+        elseif ( in_array($key, array('id', 'type', 'value')) )
+             $this->$key = $value;
+        else
+        {
+            if ($this->isProperty($key))
+                $this->setProperty($key, $value);
+            else
+                $this->setAttr($key, $value);
+        }
+        return $this;
+    }
+
+    /**
      * Get an attribute from the container.
      *
      * @param  string  $key
@@ -234,7 +255,7 @@ class Field extends Element
 	 *
 	 * @param  string $name 'id', 'type', 'settings' or previously entered setting.
 	 *
-	 * @return mixed      Setting value or null if not found.
+	 * @return mixed  Setting value or null if not found.
 	 */
 	public function __get($name)
 	{
@@ -255,11 +276,13 @@ class Field extends Element
 			return call_user_func_array(array($this, $name), $arguments);
 
 		if ( !sizeof($arguments) )
-			$this->properties[$name] = true;
+			$this->set($name, true);
 		elseif ( sizeof($arguments) == 1 )
-			$this->properties[$name] = $arguments[0];
+            $this->set($name, $arguments[0]);
+        elseif ($name == 'class')
+            $this->addClass($arguments);
 		else
-			$this->properties[$name] = $arguments;
+            $this->setProperty($name, $arguments);
 
 		return $this;
 	}
