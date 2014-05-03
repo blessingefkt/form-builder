@@ -529,6 +529,15 @@ class Form extends Element
     }
 
     /**
+     * @param mixed $model
+     */
+    public function setModel($model)
+    {
+        $this->model = $model;
+        return $this;
+    }
+
+    /**
      * @return \Illuminate\Support\Collection|\Flynsarmy\FormBuilder\Element[]
      */
     public function getRows()
