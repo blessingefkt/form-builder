@@ -33,4 +33,21 @@ interface BinderInterface {
      */
     public function afterField(Form $form, Field $field);
 
+
+    /**
+     * Add a callback that triggers before every addRow
+     * @param Element $row
+     * @param array $fields|Field[]
+     * @return string
+     */
+    public function beforeRow(Element $row, array $fields);
+
+    /**
+     * Add a callback that triggers after every addRow
+     * @param Element $row
+     * @param array $fields|Field[]
+     * @return string
+     */
+    public function afterRow(Element $row, array $fields);
+
 } 

@@ -114,4 +114,47 @@ class Element {
         $attributes['class'] = join(' ', array_pull($attributes, 'class', []));
         return $attributes;
     }
+
+    /**
+     * Return a property or attribute
+     *
+     * @param $name
+     * @return mixed
+     */
+    public function __get($name)
+    {
+        return $this->getAttr($name);
+    }
+
+    /**
+     * Set a property or attribute
+     *
+     * @param $name
+     * @param $value
+     * @return mixed
+     */
+    public function __set($name, $value)
+    {
+        $this->setAttr($name, $value);
+    }
+
+    /**
+     * Lets us add custom field settings to be used during the render process.
+     *
+     * @param  string $name      Setting name
+     * @param  array  $arguments Setting value(s)
+     *
+     * @return \Flynsarmy\FormBuilder\Field
+     */
+    public function __call($name, $arguments)
+    {
+        if ( !sizeof($arguments) )
+            $this->setAttr($name, true);
+        elseif ($name == 'class')
+            $this->addClass($arguments);
+        elseif ( sizeof($arguments) == 1 )
+            $this->setAttr($name, $arguments[0]);
+
+        return $this;
+    }
 }

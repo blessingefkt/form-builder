@@ -3,6 +3,7 @@
 
 use Flynsarmy\FormBuilder\Traits\Bindable;
 use Illuminate\Html\FormBuilder as Builder;
+use Illuminate\Html\HtmlBuilder;
 
 class LaravelFormRenderer implements FormRenderer
 {
@@ -10,17 +11,32 @@ class LaravelFormRenderer implements FormRenderer
      * @var Builder
      */
     protected $builder;
+    /**
+     * @var \Illuminate\Html\HtmlBuilder
+     */
+    private $htmlBuilder;
 
-    public function __construct(Builder $builder)
+    public function __construct(Builder $builder, HtmlBuilder $htmlBuilder)
     {
         $this->builder = $builder;
+        $this->htmlBuilder = $htmlBuilder;
     }
+
+    /**
+     * Add binders to the form
+     * @param Form $form
+     */
+    public function setFormBinders(Form $form)
+    {
+
+    }
+
 
     /**
      * @param Form $form
      * @return mixed
      */
-    public function renderFormOpen(Form $form)
+    public function formOpen(Form $form)
     {
         $options = $form->getAttributes();
         $options[$form->actionType] = $form->action;
@@ -33,10 +49,30 @@ class LaravelFormRenderer implements FormRenderer
      * @param Form $form
      * @return string
      */
-    public function renderFormClose(Form $form)
+    public function formClose(Form $form)
     {
         return $this->builder->close();
     }
+
+    /**
+     * @param Element $row
+     * @return string
+     */
+    public function rowOpen(Element $row)
+    {
+        $_atts = $this->htmlBuilder->attributes($row->getAttributes());
+        return '<div'.$_atts.'>';
+    }
+
+    /**
+     * @param Element $row
+     * @return string
+     */
+    public function rowClose(Element $row)
+    {
+        return'</div>';
+    }
+
 
     /**
      * Render a given field.
@@ -45,12 +81,20 @@ class LaravelFormRenderer implements FormRenderer
      *
      * @return string
      */
-    public  function renderField(Field $field)
+    public  function field(Field $field)
     {
         if (method_exists($this, $field->type))
             return $this->{$field->type}($field);
         else
             return $this->input($field);
+    }
+
+    /**
+     * @return string
+     */
+    public function token()
+    {
+        return $this->builder->token();
     }
 
     /**

@@ -115,6 +115,16 @@ class Field extends Element
     }
 
     /**
+     * @param $properties
+     * @return $this
+     */
+    public function appendProperties($properties)
+    {
+        $this->properties = array_merge($this->properties, $properties);
+        return $this;
+    }
+
+    /**
      * @return array
      */
     public function getProperties()
@@ -179,7 +189,7 @@ class Field extends Element
      */
     public function addName($value, $onTop = false)
     {
-        $names = $this->getProperty('baseNames');
+        $names = $this->getProperty('baseNames', []);
         if ($names !== false)
         {
             $values = (array) $value;
@@ -199,7 +209,7 @@ class Field extends Element
      * @param $value
      * @return string
      */
-    public function onGetName($value)
+    protected function onGetName($value)
     {
         if ($value === false)
             return null;
@@ -250,16 +260,27 @@ class Field extends Element
         return $name;
     }
 
-	/**
-	 * Return a setting if it exists
-	 *
-	 * @param  string $name 'id', 'type', 'settings' or previously entered setting.
-	 *
-	 * @return mixed  Setting value or null if not found.
-	 */
-	public function __get($name)
-	{
+    /**
+     * Return a property or attribute
+     *
+     * @param $name
+     * @return mixed
+     */
+    public function __get($name)
+    {
         return $this->get($name);
+    }
+
+    /**
+     * Set a property or attribute
+     *
+     * @param $name
+     * @param $value
+     * @return mixed
+     */
+    public function __set($name, $value)
+    {
+        $this->set($name, $value);
     }
 
 	/**
@@ -268,7 +289,7 @@ class Field extends Element
 	 * @param  string $name      Setting name
 	 * @param  array  $arguments Setting value(s)
 	 *
-	 * @return Flynsarmy\FormBuilder\Field
+	 * @return \Flynsarmy\FormBuilder\Field
 	 */
 	public function __call($name, $arguments)
 	{
@@ -277,10 +298,10 @@ class Field extends Element
 
 		if ( !sizeof($arguments) )
 			$this->set($name, true);
-		elseif ( sizeof($arguments) == 1 )
-            $this->set($name, $arguments[0]);
         elseif ($name == 'class')
             $this->addClass($arguments);
+		elseif ( sizeof($arguments) == 1 )
+            $this->set($name, $arguments[0]);
 		else
             $this->setProperty($name, $arguments);
 

@@ -1,10 +1,28 @@
 <?php namespace Flynsarmy\FormBuilder\Traits;
 
 use Closure;
+use Flynsarmy\FormBuilder\BinderInterface;
 
 trait Bindable
 {
     protected $bindings = array();
+
+
+    /**
+     * @param BinderInterface $binder
+     * @return $this
+     */
+    public function addBinder(BinderInterface $binder)
+    {
+        $class = get_class($binder);
+        $this->bind('beforeField', [$binder, 'beforeField'], $class);
+        $this->bind('afterField', [$binder, 'afterField'], $class);
+        $this->bind('beforeRow', [$binder, 'beforeRow'], $class);
+        $this->bind('afterRow', [$binder, 'afterRow'], $class);
+        $this->bind('afterForm', [$binder, 'afterForm'], $class);
+        $this->bind('beforeForm', [$binder, 'beforeForm'], $class);
+        return $this;
+    }
 
     /**
      * @param $binding

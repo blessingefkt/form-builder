@@ -7,7 +7,7 @@ use Flynsarmy\FormBuilder\Exceptions\RendererNotFound;
 class FormBuilderManager
 {
     use Traits\Bindable;
-    protected $renderers = [];
+    protected $renderers = [], $resolvedRenderers = [];
     protected $macros = [];
     protected $defaultRenderer = null;
 
@@ -71,17 +71,23 @@ class FormBuilderManager
     public function addRenderer($name, \Closure $callback)
     {
         $this->renderers[$name] = $callback;
+        $this->resolvedRenderers[$name] = false;
     }
 
     /**
      * @param $name
-     * @return callable
+     * @return \Flynsarmy\FormBuilder\FormRenderer
      * @throws Exceptions\RendererNotFound
      */
     public function getRenderer($name)
     {
         if (!isset($this->renderers[$name]))
             throw new RendererNotFound($name);
+        if (!$this->resolvedRenderers[$name])
+        {
+            $callback = $this->renderers[$name];
+            $this->renderers[$name] = call_user_func($callback);
+        }
         return $this->renderers[$name];
     }
 

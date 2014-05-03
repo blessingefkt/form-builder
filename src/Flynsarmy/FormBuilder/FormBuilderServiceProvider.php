@@ -17,7 +17,7 @@ class FormBuilderServiceProvider extends ServiceProvider {
         $formBuilder = $this->app['formbuilder'];
         $formBuilder->addRenderer('laravel', function()
         {
-           return new LaravelFormRenderer($this->app['form']);
+           return new LaravelFormRenderer($this->app['form'], $this->app['html']);
         });
         $formBuilder->setDefaultRenderer('laravel');
     }

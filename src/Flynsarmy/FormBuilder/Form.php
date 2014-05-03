@@ -4,11 +4,15 @@ use Closure;
 use Flynsarmy\FormBuilder\Exceptions\FieldAlreadyExists;
 use Flynsarmy\FormBuilder\Exceptions\FieldNotFound;
 use Flynsarmy\FormBuilder\Helpers\ArrayHelper;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
+
 /**
  * Class Form
  * @property string $model
  * @property string $actionType
  * @property string $action
+ * @property string $rowTag
  * @property array $fieldNames
  */
 class Form extends Element
@@ -28,13 +32,24 @@ class Form extends Element
      */
     protected $model;
     /**
+     * @var array|Field[]
+     */
+    protected $fields = [];
+    /**
+     * @var array|Element[]
+     */
+    protected $rows = [];
+    /**
      * @var array
      */
-    protected $fields = [], $fieldNames = [];
+    protected $fieldNames = [],
+        $fieldPropertyBuffer = [],
+        $fieldAttributeBuffer = [];
     /**
      * @var string
      */
     protected $action, $actionType, $rendererName;
+    protected $enableAutoLabels = true;
 
     /**
      * @param FormBuilderManager $manager
@@ -48,27 +63,22 @@ class Form extends Element
         $this->rendererName = $rendererName;
     }
 
-    public function addBinder(BinderInterface $binder)
-    {
-        $class = get_class($binder);
-        $this->bind('beforeField', [$binder, 'beforeField'], $class);
-        $this->bind('afterField', [$binder, 'afterField'], $class);
-        $this->bind('afterForm', [$binder, 'afterForm'], $class);
-        $this->bind('beforeForm', [$binder, 'beforeForm'], $class);
-        return $this;
-    }
-
     /**
-     * @return FormRenderer
+     * Add a addRow of field to the form
+     * @param \Closure $closure     the form is passed into the closure,
+     *                              any fields created in the closure will be added to the addRow
+     * @param array|string $rowId   defaults to a random string
+     * @return Element              the element object of the addRow
      */
-    public function renderer()
+    public function addRow(\Closure $closure, $rowId = null)
     {
-        if (!$this->_renderer)
-        {
-            $rendererCallback = $this->manager->getRenderer($this->rendererName);
-            $this->_renderer =  call_user_func($rendererCallback, $this);
-        }
-        return $this->_renderer;
+        if (is_null($rowId)) $rowId = Str::random(8);
+        $this->rows[$rowId] = new Element(['id' => 'row-'.$rowId]);
+        $this->rows[$rowId]->addClass('field-row');
+        $this->addBufferProperties(['row' => $rowId]);
+        call_user_func($closure, $this);
+        $this->clearBuffers();
+        return $this->rows[$rowId];
     }
 
     /**
@@ -79,7 +89,9 @@ class Form extends Element
      */
     public function addFieldName($name)
     {
-        $this->fieldNames = array_merge($this->fieldNames, func_get_args());
+        $args = func_get_args();
+        $args = array_reverse($args);
+        $this->fieldNames = array_merge($this->fieldNames, $args);
         return $this;
     }
 
@@ -236,6 +248,8 @@ class Form extends Element
     protected function addAtPosition($position, $id, $type)
     {
         $field = new Field($id, $type);
+        $field->mergeAttributes($this->fieldAttributeBuffer);
+        $field->appendProperties($this->fieldPropertyBuffer);
         $this->fields = ArrayHelper::insert($this->fields, [$id => $field], $position);
         return $field;
     }
@@ -294,7 +308,7 @@ class Form extends Element
     public function open(array $attributes = array())
     {
         $this->mergeAttributes($attributes);
-        return $this->renderer()->renderFormOpen($this);
+        return $this->getRenderer()->formOpen($this);
     }
 
     /**
@@ -303,7 +317,7 @@ class Form extends Element
      */
     public function close()
     {
-        return $this->renderer()->renderFormClose($this);
+        return $this->getRenderer()->formClose($this);
     }
 
     /**
@@ -314,31 +328,53 @@ class Form extends Element
     public function render()
     {
         $output = '';
-        // Are we using a tabbed interface?
-        $tabs = $this->getFieldsBySetting('tab', '');
 
-        $output .= $this->fire('beforeForm', $this, $tabs);
+        $output .= $this->fire('beforeForm', $this);
 
-        // Render a tabless form
-        if ( sizeof($tabs) == 1 )
+        // Render a rowless form
+        if ( sizeof($this->rows) == 0 )
         {
             $output .= $this->renderFields($this->fields);
         }
         else
         {
-            foreach ( $tabs as $name => $fields )
-                $output .= $this->renderFields($fields);
+            $fields = $this->getFieldsByRow('_default');
+            foreach ( $this->rows as $rowId => $row )
+            {
+                $rowFields = array_pull($fields, $rowId, []);
+                if (!empty($rowFields))
+                    $output .= $this->renderRow($row, $rowFields);
+            }
+            if (isset($fields['_default']))
+            {
+                $output .= $this->renderFields($fields['_default']);
+            }
         }
 
-        $output .= $this->fire('afterForm', $this, $tabs);
+        $output .= $this->fire('afterForm', $this);
 
         return $output;
     }
 
     /**
+     * Returns an array of fields grouped by row
+     * @param  string|null $default  fields without a row will be assigned to this key
+     * @return array
+     * [
+     *   'rowId' => [$field, $field, ...],
+     *   ...
+     * ]
+     */
+    public function getFieldsByRow($default = '_default')
+    {
+        $sorted = $this->getFieldsByProperty('row', $default);
+        return $sorted;
+    }
+
+    /**
      * Returns the field list broken up by a given setting.
      *
-     * @param  string $setting A field setting such as 'tab'. These will form
+     * @param  string $property A field setting such as 'tab'. These will form
      *                         the keys of the associative array returned.
      * @param  string $default Default value to use if the setting doesn't exist
      *                         for a field.
@@ -350,18 +386,14 @@ class Form extends Element
      *   ...
      * ]
      */
-    protected function getFieldsBySetting($setting, $default='')
+    protected function getFieldsByProperty($property, $default='')
     {
         $sorted = array();
 
         foreach ( $this->fields as $field )
         {
-            if ( isset($field->settings[$setting]) )
-                $field_setting = $field->settings[$setting];
-            else
-                $field_setting = $default;
-
-            $sorted[$field_setting][] = $field;
+            $field_property = $field->getProperty($property, $default);
+            $sorted[$field_property][] = $field;
         }
 
         return $sorted;
@@ -369,9 +401,29 @@ class Form extends Element
 
     /**
      * Render a list of fields.
+     * @param Element $row
+     * @param array|Field[] $fields
+     * @return string
+     */
+    protected function renderRow($row, $fields)
+    {
+        $count = count($fields);
+        $output = $this->fire('beforeRow', $row, $fields);
+        $output .= $this->getRenderer()->rowOpen($row, $fields);
+        foreach ( $fields as $field )
+        {
+            $field->setProperty('rowSize', $count);
+            $output .= $this->renderField($field);
+        }
+        $output .= $this->getRenderer()->rowClose($row, $fields);
+        $output .= $this->fire('afterRow', $row, $fields);
+        return $output;
+    }
+
+    /**
+     * Render a list of fields.
      *
-     * @param  array  $fields
-     *
+     * @param  array $fields
      * @return string
      */
     protected function renderFields($fields)
@@ -394,19 +446,106 @@ class Form extends Element
     public  function renderField(Field $field)
     {
         $output = '';
-        $output .= $this->fire('beforeField', $this, $field);
 
+        if ($this->enableAutoLabels && !$field->label)
+            $field->label = Str::title($field->id);
         if ($this->fieldNames)
             $field->addName($this->fieldNames, true);
 
+        $output .= $this->fire('beforeField', $this, $field);
+
         if ($this->manager->isMacro($field->type))
-            $output .= $this->manager->callMacro($field->type, $field, $this->render());
+            $fieldHtml = $this->manager->callMacro($field->type, $field, $this->render());
         else
-            $output .= $this->renderer()->renderField($field);
+            $fieldHtml = $this->getRenderer()->field($field);
+
+        $output .= $fieldHtml;
 
         $output .= $this->fire('afterField', $this, $field);
 
         return $output;
     }
 
+    /**
+     * @return FormRenderer
+     */
+    public function getRenderer()
+    {
+        if (!$this->_renderer)
+        {
+            $this->_renderer = $this->manager->getRenderer($this->rendererName);
+            $this->_renderer->setFormBinders($this);
+        }
+        return $this->_renderer;
+    }
+
+    /**
+     * Append attributes to the attribute buffer
+     * @param array $attributes
+     * @return $this
+     */
+    public function addBufferAttributes(array $attributes = [])
+    {
+        $this->fieldAttributeBuffer = array_merge_recursive($this->fieldAttributeBuffer, $attributes);
+        return $this;
+    }
+
+    /**
+     * Append properties to the property buffer
+     * @param array $properties
+     * @return $this
+     */
+    public function addBufferProperties(array $properties = [])
+    {
+        $this->fieldPropertyBuffer = array_merge($this->fieldPropertyBuffer, $properties);
+        return $this;
+    }
+
+    /**
+     * Set field property and attribute buffers, overwriting any existing values
+     * @param array $properties
+     * @param array $attributes
+     * @return $this
+     */
+    public function setBuffers(array $properties, array $attributes)
+    {
+        $this->fieldPropertyBuffer = $properties;
+        $this->fieldAttributeBuffer = $attributes;
+        return $this;
+    }
+
+    /**
+     * Clear field property and attribute buffers
+     * @return $this
+     */
+    public function clearBuffers()
+    {
+        $this->fieldPropertyBuffer = [];
+        $this->fieldAttributeBuffer = [];
+        return $this;
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection|\Flynsarmy\FormBuilder\Element[]
+     */
+    public function getRows()
+    {
+        return new Collection($this->rows);
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection|\Flynsarmy\FormBuilder\Field[]
+     */
+    public function getFields()
+    {
+        return new Collection($this->fields);
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->render();
+    }
 }
