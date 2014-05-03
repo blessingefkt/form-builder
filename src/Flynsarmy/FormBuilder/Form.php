@@ -75,8 +75,8 @@ class Form extends Element
         $this->rows[$rowId] = new Element(['id' => 'row-'.$rowId]);
         $this->rows[$rowId]->addClass('field-row');
         $this->addBufferProperties(['row' => $rowId]);
+        $this->addBufferAttributes(['class' => ['row-'.$rowId]]);
         call_user_func($closure, $this);
-        $this->clearBuffers();
         return $this->rows[$rowId];
     }
 
@@ -248,8 +248,10 @@ class Form extends Element
     protected function addAtPosition($position, $slug, $type = null)
     {
         $field = new Field($slug, $type ?: 'text');
-        $field->mergeAttributes($this->fieldAttributeBuffer);
-        $field->appendProperties($this->fieldPropertyBuffer);
+        $attributes = $this->getBufferAttributes();
+        $field->mergeAttributes($attributes);
+        $properties = $this->getBufferProperties();
+        $field->appendProperties($properties);
         $this->fire('newField', $field);
         $this->fire('new'.Str::studly($field->type).'Field', $field);
         $this->fields = ArrayHelper::insert($this->fields, [$field->slug => $field], $position);
@@ -488,32 +490,39 @@ class Form extends Element
      */
     public function addBufferAttributes(array $attributes = [])
     {
-        $this->fieldAttributeBuffer = array_merge_recursive($this->fieldAttributeBuffer, $attributes);
+        $this->fieldAttributeBuffer[] = $attributes;
         return $this;
+    }
+
+    /**
+     * Pop that last added attributes off the buffer
+     * @return array
+     */
+    public function getBufferAttributes()
+    {
+        $result = array_pop($this->fieldAttributeBuffer);
+        return $result ?: [];
     }
 
     /**
      * Append properties to the property buffer
      * @param array $properties
-     * @return $this
+     * @return array
      */
     public function addBufferProperties(array $properties = [])
     {
-        $this->fieldPropertyBuffer = array_merge($this->fieldPropertyBuffer, $properties);
+        $this->fieldPropertyBuffer[] = $properties;
         return $this;
     }
 
     /**
-     * Set field property and attribute buffers, overwriting any existing values
-     * @param array $properties
-     * @param array $attributes
+     * Pop that last added properties off the buffer
      * @return $this
      */
-    public function setBuffers(array $properties, array $attributes)
+    public function getBufferProperties()
     {
-        $this->fieldPropertyBuffer = $properties;
-        $this->fieldAttributeBuffer = $attributes;
-        return $this;
+        $result = array_pop($this->fieldPropertyBuffer);
+        return $result ?: [];
     }
 
     /**
