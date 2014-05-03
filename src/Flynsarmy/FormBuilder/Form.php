@@ -175,48 +175,48 @@ class Form extends Element
     /**
      * Add a new field to the form
      *
-     * @param  string $id Unique identifier for this field
+     * @param  string $slug Unique identifier for this field
      * @param  string $type Type of field
      *
      * @throws Exceptions\FieldAlreadyExists
      * @return \Flynsarmy\FormBuilder\Field
      */
-    public function add($id, $type)
+    public function add($slug, $type)
     {
-        if ( isset($this->fields[$id]) )
-            throw new FieldAlreadyExists("Field with id '$id' has already been added to this form.");
+        if ( isset($this->fields[$slug]) )
+            throw new FieldAlreadyExists("Field with id '$slug' has already been added to this form.");
 
-        return $this->addAtPosition(sizeof($this->fields), $id, $type);
+        return $this->addAtPosition(sizeof($this->fields), $slug, $type);
     }
 
     /**
      * Add a new field to the form
      *
      * @param  string $existingId ID of field to insert before
-     * @param  string $id Unique identifier for this field
+     * @param  string $slug Unique identifier for this field
      * @param  string $type Type of field
      *
      * @throws Exceptions\FieldNotFound
      * @throws Exceptions\FieldAlreadyExists
      * @return \Flynsarmy\FormBuilder\Field
      */
-    public function addBefore($existingId, $id, $type)
+    public function addBefore($existingId, $slug, $type)
     {
         $keyPosition = ArrayHelper::getKeyPosition($this->fields, $existingId);
         if ( $keyPosition == -1 )
             throw new FieldNotFound("Field with id '$existingId' does't exist.");
 
-        if ( isset($this->fields[$id]) )
-            throw new FieldAlreadyExists("Field with id '$id' has already been added to this form.");
+        if ( isset($this->fields[$slug]) )
+            throw new FieldAlreadyExists("Field with id '$slug' has already been added to this form.");
 
-        return $this->addAtPosition($keyPosition, $id, $type);
+        return $this->addAtPosition($keyPosition, $slug, $type);
     }
 
     /**
      * Add a new field to the form
      *
      * @param  string $existingId ID of field to insert after
-     * @param  string $id Unique identifier for this field
+     * @param  string $slug Unique identifier for this field
      * @param  string $type Type of field
      *
      * @throws Exceptions\FieldNotFound
@@ -224,66 +224,66 @@ class Form extends Element
      * @return \Flynsarmy\FormBuilder\Field
      *
      */
-    public function addAfter($existingId, $id, $type)
+    public function addAfter($existingId, $slug, $type)
     {
         $keyPosition = ArrayHelper::getKeyPosition($this->fields, $existingId);
         if ( $keyPosition == -1 )
             throw new FieldNotFound("Field with id '$existingId' does't exist.");
 
-        if ( isset($this->fields[$id]) )
-            throw new FieldAlreadyExists("Field with id '$id' has already been added to this form.");
+        if ( isset($this->fields[$slug]) )
+            throw new FieldAlreadyExists("Field with id '$slug' has already been added to this form.");
 
-        return $this->addAtPosition(++$keyPosition, $id, $type);
+        return $this->addAtPosition(++$keyPosition, $slug, $type);
     }
 
     /**
      * Add a new field to the form at a given position
      *
      * @param  integer $position     Array index position to add the field
-     * @param  string  $id           Unique identifier for this field
+     * @param  string  $slug           Unique identifier for this field
      * @param  string $type          Type of field
      *
      * @return \Flynsarmy\FormBuilder\Field
      */
-    protected function addAtPosition($position, $id, $type)
+    protected function addAtPosition($position, $slug, $type)
     {
-        $field = new Field($id, $type);
+        $field = new Field($slug, $type);
         $field->mergeAttributes($this->fieldAttributeBuffer);
         $field->appendProperties($this->fieldPropertyBuffer);
-        $this->fields = ArrayHelper::insert($this->fields, [$id => $field], $position);
+        $this->fields = ArrayHelper::insert($this->fields, [$slug => $field], $position);
         return $field;
     }
 
     /**
      * Retrieve a field with given ID
      *
-     * @param  string $id Unique identifier for the field
+     * @param  string $slug Unique identifier for the field
      *
      * @throws Exceptions\FieldNotFound
      * @return \Flynsarmy\FormBuilder\Field
      */
-    public function get($id)
+    public function get($slug)
     {
-        if ( !isset($this->fields[$id]) )
-            throw new FieldNotFound("Field with id '$id' does't exist.");
+        if ( !isset($this->fields[$slug]) )
+            throw new FieldNotFound("Field with id '$slug' does't exist.");
 
-        return $this->fields[$id];
+        return $this->fields[$slug];
     }
 
     /**
      * Remove a field from the form by ID
      *
-     * @param  string $id Unique identifier for the field
+     * @param  string $slug Unique identifier for the field
      *
      * @throws Exceptions\FieldNotFound
      * @return \Flynsarmy\FormBuilder\Form
      */
-    public function remove($id)
+    public function remove($slug)
     {
-        if ( !isset($this->fields[$id]) )
-            throw new FieldNotFound("Field with id '$id' does't exist.");
+        if ( !isset($this->fields[$slug]) )
+            throw new FieldNotFound("Field with id '$slug' does't exist.");
 
-        unset($this->fields[$id]);
+        unset($this->fields[$slug]);
 
         return $this;
     }

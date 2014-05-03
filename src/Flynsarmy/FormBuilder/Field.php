@@ -11,16 +11,21 @@ use Illuminate\Support\Str;
  */
 class Field extends Element
 {
-	protected $id;
+	protected $slug;
     protected $type;
     protected $value;
-    protected $properties = array();
+    protected $properties = array(
+        'row' => null,
+        'rowSize' => 0,
+        'baseNames' => [],
+    );
 
     /**
      * Creates a new form field.
      *
      * @param array $id
-     * @param null $value
+     * @param string $type
+     * @param string|null $value
      * @param array $attributes
      */
 	public function __construct($id, $type, $value = null, array $attributes = [])
@@ -189,7 +194,7 @@ class Field extends Element
      */
     public function addName($value, $onTop = false)
     {
-        $names = $this->getProperty('baseNames', []);
+        $names = $this->getProperty('baseNames');
         if ($names !== false)
         {
             $values = (array) $value;
