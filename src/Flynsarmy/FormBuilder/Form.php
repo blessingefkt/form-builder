@@ -50,10 +50,11 @@ class Form extends Element
 
     public function addBinder(BinderInterface $binder)
     {
-        $this->bind('beforeField', [$binder, 'beforeField']);
-        $this->bind('afterField', [$binder, 'afterField']);
-        $this->bind('afterForm', [$binder, 'afterForm']);
-        $this->bind('beforeForm', [$binder, 'beforeForm']);
+        $class = get_class($binder);
+        $this->bind('beforeField', [$binder, 'beforeField'], $class);
+        $this->bind('afterField', [$binder, 'afterField'], $class);
+        $this->bind('afterForm', [$binder, 'afterForm'], $class);
+        $this->bind('beforeForm', [$binder, 'beforeForm'], $class);
         return $this;
     }
 
