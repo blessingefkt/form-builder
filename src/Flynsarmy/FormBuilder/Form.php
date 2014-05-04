@@ -265,9 +265,11 @@ class Form extends Element
         $this->fire('new'.Str::studly($field->type).'Field', $field);
         if (!empty($this->buffers))
         {
-            end($this->buffers);
-            $key = key($this->buffers);
-            $this->buffers[$key][] = $field;
+            foreach($this->buffers as $k => $buffer)
+            {
+                $buffer[] = $field;
+                $this->buffers[$k] = $buffer;
+            }
         }
         $this->fields = ArrayHelper::insert($this->fields, [$field->slug => $field], $position);
         return $field;
