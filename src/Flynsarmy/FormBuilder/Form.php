@@ -196,7 +196,7 @@ class Form extends Element
     public function add($slug, $type = null)
     {
         if ( isset($this->fields[$slug]) )
-            throw new FieldAlreadyExists("Field with id '$slug' has already been added to this form.");
+            throw new FieldAlreadyExists("Field with slug '$slug' has already been added to this form.");
 
         return $this->addAtPosition(sizeof($this->fields), $slug, $type);
     }
@@ -204,7 +204,7 @@ class Form extends Element
     /**
      * Add a new field to the form
      *
-     * @param  string $existingId ID of field to insert before
+     * @param  string $existingId slug of field to insert before
      * @param  string $slug Unique identifier for this field
      * @param  string $type Type of field
      *
@@ -216,10 +216,10 @@ class Form extends Element
     {
         $keyPosition = ArrayHelper::getKeyPosition($this->fields, $existingId);
         if ( $keyPosition == -1 )
-            throw new FieldNotFound("Field with id '$existingId' does't exist.");
+            throw new FieldNotFound("Field with slug '$existingId' does't exist.");
 
         if ( isset($this->fields[$slug]) )
-            throw new FieldAlreadyExists("Field with id '$slug' has already been added to this form.");
+            throw new FieldAlreadyExists("Field with slug '$slug' has already been added to this form.");
 
         return $this->addAtPosition($keyPosition, $slug, $type);
     }
@@ -227,7 +227,7 @@ class Form extends Element
     /**
      * Add a new field to the form
      *
-     * @param  string $existingId ID of field to insert after
+     * @param  string $existingId slug of field to insert after
      * @param  string $slug Unique identifier for this field
      * @param  string $type Type of field
      *
@@ -240,10 +240,10 @@ class Form extends Element
     {
         $keyPosition = ArrayHelper::getKeyPosition($this->fields, $existingId);
         if ( $keyPosition == -1 )
-            throw new FieldNotFound("Field with id '$existingId' does't exist.");
+            throw new FieldNotFound("Field with slug '$existingId' does't exist.");
 
         if ( isset($this->fields[$slug]) )
-            throw new FieldAlreadyExists("Field with id '$slug' has already been added to this form.");
+            throw new FieldAlreadyExists("Field with slug '$slug' has already been added to this form.");
 
         return $this->addAtPosition(++$keyPosition, $slug, $type);
     }
@@ -277,7 +277,7 @@ class Form extends Element
     }
 
     /**
-     * Retrieve a field with given ID
+     * Retrieve a field with given slug
      *
      * @param  string $slug Unique identifier for the field
      *
@@ -286,14 +286,25 @@ class Form extends Element
      */
     public function get($slug)
     {
-        if ( !isset($this->fields[$slug]) )
-            throw new FieldNotFound("Field with id '$slug' does't exist.");
+        if ( ! $this->has($slug) )
+            throw new FieldNotFound("Field with slug '$slug' does't exist.");
 
         return $this->fields[$slug];
     }
 
     /**
-     * Remove a field from the form by ID
+     * Determine if a field exists
+     *
+     * @param  string $slug Unique identifier for the field
+     * @return bool
+     */
+    public function has($slug)
+    {
+        return isset($this->fields[$slug]);
+    }
+
+    /**
+     * Remove a field from the form by slug
      *
      * @param  string $slug Unique identifier for the field
      *
@@ -303,7 +314,7 @@ class Form extends Element
     public function remove($slug)
     {
         if ( !isset($this->fields[$slug]) )
-            throw new FieldNotFound("Field with id '$slug' does't exist.");
+            throw new FieldNotFound("Field with slug '$slug' does't exist.");
 
         unset($this->fields[$slug]);
 
