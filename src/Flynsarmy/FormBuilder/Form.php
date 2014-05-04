@@ -258,7 +258,7 @@ class Form extends Element
      */
     protected function addAtPosition($position, $slug, $type = null)
     {
-        $field = new Field($slug, $type ?: 'text');
+        $field = new Field($this, $slug, $type ?: 'text');
         $field->row = 'row-'.count($this->fields)*rand(1, 10).count($this->fields);
         $this->fire('newField', $field);
         $this->fire('new'.Str::studly($field->type).'Field', $field);
@@ -476,7 +476,7 @@ class Form extends Element
      *
      * @return string
      */
-    public  function renderField(Field $field)
+    public function renderField(Field $field)
     {
         $output = '';
 

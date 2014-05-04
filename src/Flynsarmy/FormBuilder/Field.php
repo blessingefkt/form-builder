@@ -1,5 +1,4 @@
 <?php namespace Flynsarmy\FormBuilder;
-use Illuminate\Support\Str;
 
 /**
  * Class Field
@@ -29,19 +28,25 @@ class Field extends Element
         'value' => null,
         'baseNames' => [],
     );
+    /**
+     * @var Form
+     */
+    private $form;
 
     /**
      * Creates a new form field.
      *
+     * @param Form $form
      * @param array $slug
      * @param string $type
      * @param string|null $value
      * @param array $attributes
      * @param array $properties
      */
-    public function __construct($slug, $type, $value = null, array $attributes = [], array $properties = [])
+    public function __construct(Form $form, $slug, $type, $value = null, array $attributes = [], array $properties = [])
     {
         parent::__construct($attributes, $properties);
+        $this->form = $form;
         $this->slug = $slug;
         $this->type($type);
         $this->value($value);
@@ -208,5 +213,23 @@ class Field extends Element
             $this->setProperty($name, $arguments);
 
         return $this;
+    }
+
+    /**
+     * Render the field
+     *
+     * @return string
+     */
+    public function render()
+    {
+       return $this->form->renderField($this);
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->render();
     }
 }
