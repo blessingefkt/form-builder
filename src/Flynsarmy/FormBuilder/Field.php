@@ -11,6 +11,7 @@
  * @property array $baseNames
  * @property string $row
  * @property int $rowSize
+ * @property bool $skip     if true, the field will be skipped when the form renders all fields
  */
 class Field extends Element
 {
@@ -26,6 +27,7 @@ class Field extends Element
         'row' => null,
         'rowSize' => 0,
         'value' => null,
+        'skip' => false,
         'baseNames' => [],
     );
     /**

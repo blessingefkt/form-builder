@@ -456,16 +456,17 @@ class Form extends Element
     /**
      * Render a list of fields.
      *
-     * @param  array $fields
+     * @param  array|Field[] $fields
      * @return string
      */
     protected function renderFields($fields)
     {
         $output = '';
-
         foreach ( $fields as $field )
+        {
+            if ($field->skip) continue;
             $output .= $this->renderField($field);
-
+        }
         return $output;
     }
 
