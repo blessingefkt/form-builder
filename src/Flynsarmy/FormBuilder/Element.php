@@ -239,7 +239,11 @@ class Element {
     public function getAttributes()
     {
         $attributes = $this->attributes;
-        $attributes['class'] = join(' ', array_pull($attributes, 'class', []));
+        $class = array_pull($attributes, 'class');
+        if (is_array($class))
+            $attributes['class'] = join(' ', $class);
+        elseif(is_string($class))
+            $attributes['class'] = $class;
         return $attributes;
     }
 

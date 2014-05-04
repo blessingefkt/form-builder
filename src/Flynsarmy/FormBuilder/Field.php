@@ -58,7 +58,6 @@ class Field extends Element
         return parent::get($key, $default);
     }
 
-
     /**
      * Set the field type.
      *
