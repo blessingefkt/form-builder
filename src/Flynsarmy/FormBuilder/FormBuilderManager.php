@@ -7,9 +7,11 @@ use Flynsarmy\FormBuilder\Exceptions\RendererNotFound;
 class FormBuilderManager
 {
     use Traits\Bindable;
-    protected $renderers = [], $resolvedRenderers = [];
-    protected $macros = [];
-    protected $macroInitializers = [];
+    protected $renderers = [],
+        $resolvedRenderers = [],
+        $macros = [],
+        $macroInitializers = [],
+        $defaultBinders = [];
     protected $defaultRenderer = null;
 
     /**
@@ -23,6 +25,8 @@ class FormBuilderManager
     {
         $form = new Form($this, $renderer ?: $this->defaultRenderer);
 
+        foreach ($this->defaultBinders as $binder)
+            $form->addBinder($binder);
         foreach ( $this->bindings as $event => $bindable_callback )
             $form->bind($event, $bindable_callback);
 
@@ -97,6 +101,14 @@ class FormBuilderManager
             $this->renderers[$name] = call_user_func($callback);
         }
         return $this->renderers[$name];
+    }
+
+    /**
+     * @param BinderInterface $binderInterface
+     */
+    public function addDefaultBinder(BinderInterface $binderInterface)
+    {
+        $this->defaultBinders[] = $binderInterface;
     }
 
     /**
