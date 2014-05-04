@@ -261,7 +261,7 @@ class Form extends Element
     protected function addAtPosition($position, $slug, $type = null)
     {
         $field = new Field($slug, $type ?: 'text');
-        $field->row = 'row-'.count($this->fields)*rand(1, 10);
+        $field->row = 'row-'.count($this->fields)*rand(1, 10).count($this->fields);
         $this->fire('newField', $field);
         $this->fire('new'.Str::studly($field->type).'Field', $field);
         if (!empty($this->buffers))
@@ -360,12 +360,14 @@ class Form extends Element
         }
         else
         {
-            $fields = $this->getFieldsByRow('_default');
-            foreach ( $this->rows as $rowId => $row )
+            $rows = $this->getFieldsByRow('_default');
+            foreach ($rows as $rowId => $rowFields )
             {
-                $rowFields = array_pull($fields, $rowId, []);
-                if (!empty($rowFields))
+                $row = array_pull($this->rows, $rowId, false);
+                if ($row)
                     $output .= $this->renderRow($row, $rowFields);
+                else
+                    $output .= $this->renderFields($rowFields);
             }
             if (isset($fields['_default']))
             {
