@@ -284,7 +284,7 @@ class Form extends Element
      */
     public function getField($slug)
     {
-        if ( ! $this->has($slug) )
+        if ( ! $this->hasField($slug) )
             throw new FieldNotFound("Field with slug '$slug' does't exist.");
 
         return $this->fields[$slug];
