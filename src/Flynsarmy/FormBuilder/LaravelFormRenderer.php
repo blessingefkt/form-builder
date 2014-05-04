@@ -184,7 +184,7 @@ class LaravelFormRenderer implements FormRenderer
      */
     public function select(Field $field)
     {
-        return $this->builder->select($field->name, $field->options ?: [], $field->selected, $field->getAttributes());
+        return $this->builder->select($field->name, $field->options ?: [], $field->value, $field->getAttributes());
     }
 
     /**
