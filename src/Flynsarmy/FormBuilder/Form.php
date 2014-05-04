@@ -282,7 +282,7 @@ class Form extends Element
      * @throws Exceptions\FieldNotFound
      * @return \Flynsarmy\FormBuilder\Field
      */
-    public function get($slug)
+    public function getField($slug)
     {
         if ( ! $this->has($slug) )
             throw new FieldNotFound("Field with slug '$slug' does't exist.");
@@ -296,7 +296,7 @@ class Form extends Element
      * @param  string $slug Unique identifier for the field
      * @return bool
      */
-    public function has($slug)
+    public function hasField($slug)
     {
         return isset($this->fields[$slug]);
     }
