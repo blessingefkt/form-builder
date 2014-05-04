@@ -69,8 +69,8 @@ class Form extends Element
      */
     public function addRow(\Closure $closure, $rowId = null)
     {
-        if (is_null($rowId)) $rowId = Str::random(8);
-        $this->rows[$rowId] = new Element(['id' => 'row-'.$rowId]);
+        if (is_null($rowId)) $rowId = 'row-'.Str::random(8);
+        $this->rows[$rowId] = new Element(['id' => $rowId]);
         $this->rows[$rowId]->addClass('field-row');
         $this->buffer($closure, ['row' => $rowId]);
         return $this->rows[$rowId];
@@ -261,6 +261,7 @@ class Form extends Element
     protected function addAtPosition($position, $slug, $type = null)
     {
         $field = new Field($slug, $type ?: 'text');
+        $field->row = 'row-'.count($this->fields)*rand(1, 10);
         $this->fire('newField', $field);
         $this->fire('new'.Str::studly($field->type).'Field', $field);
         if (!empty($this->buffers))
@@ -353,7 +354,7 @@ class Form extends Element
         $output .= $this->fire('beforeForm', $this);
 
         // Render a rowless form
-        if ( sizeof($this->rows) == 0 )
+        if ( sizeof($this->rows) == count($this->fields) )
         {
             $output .= $this->renderFields($this->fields);
         }
