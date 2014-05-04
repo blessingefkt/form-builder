@@ -10,10 +10,13 @@ use Illuminate\Support\Str;
  */
 class Field extends Element
 {
-	protected $slug;
+    protected $slug;
     protected $type;
     protected $value;
     protected $properties = array(
+        'label' => null,
+        'description' => null,
+        'options' => [],
         'row' => null,
         'rowSize' => 0,
         'baseNames' => [],
@@ -27,8 +30,8 @@ class Field extends Element
      * @param string|null $value
      * @param array $attributes
      */
-	public function __construct($slug, $type, $value = null, array $attributes = [])
-	{
+    public function __construct($slug, $type, $value = null, array $attributes = [])
+    {
         parent::__construct($attributes);
         $this->slug = $slug;
         $this->type($type);
@@ -71,7 +74,7 @@ class Field extends Element
         if (method_exists($this, $method = 'onSet'.Str::studly($key)))
             $this->{$method}($value);
         elseif ( in_array($key, array('slug', 'type', 'value')) )
-             $this->$key = $value;
+            $this->$key = $value;
         else
         {
             if ($this->isProperty($key))
@@ -153,8 +156,10 @@ class Field extends Element
      */
     public function getProperty($name, $default = null)
     {
-        if (!$this->hasProperty($name)) return $default;
-        $value = $this->properties[$name];
+        if (!$this->hasProperty($name))
+            $value = $default;
+        else
+            $value = $this->properties[$name];
         return value($value);
     }
 
@@ -287,28 +292,28 @@ class Field extends Element
         $this->set($name, $value);
     }
 
-	/**
-	 * Lets us add custom field settings to be used during the render process.
-	 *
-	 * @param  string $name      Setting name
-	 * @param  array  $arguments Setting value(s)
-	 *
-	 * @return \Flynsarmy\FormBuilder\Field
-	 */
-	public function __call($name, $arguments)
-	{
-		if ( method_exists($this, $name) )
-			return call_user_func_array(array($this, $name), $arguments);
+    /**
+     * Lets us add custom field settings to be used during the render process.
+     *
+     * @param  string $name      Setting name
+     * @param  array  $arguments Setting value(s)
+     *
+     * @return \Flynsarmy\FormBuilder\Field
+     */
+    public function __call($name, $arguments)
+    {
+        if ( method_exists($this, $name) )
+            return call_user_func_array(array($this, $name), $arguments);
 
-		if ( !sizeof($arguments) )
-			$this->set($name, true);
+        if ( !sizeof($arguments) )
+            $this->set($name, true);
         elseif ($name == 'class')
             $this->addClass($arguments);
-		elseif ( sizeof($arguments) == 1 )
+        elseif ( sizeof($arguments) == 1 )
             $this->set($name, $arguments[0]);
-		else
+        else
             $this->setProperty($name, $arguments);
 
-		return $this;
-	}
+        return $this;
+    }
 }
