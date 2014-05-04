@@ -1,14 +1,150 @@
 <?php namespace Flynsarmy\FormBuilder;
 
+
+use Illuminate\Support\Str;
+
 /**
  * Class Element
  */
 class Element {
     protected $attributes = array();
+    protected $properties = array();
 
-    public function __construct(array $attributes = [])
+    /**
+     * @param array $attributes
+     * @param array $properties
+     */
+    public function __construct(array $attributes = [], array $properties = [])
     {
-        $this->attributes = $attributes;
+        $this->mergeAttributes($attributes);
+        $this->setProperties($properties);
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     * @return $this
+     */
+    public function set($key, $value)
+    {
+        if (method_exists($this, $method = 'onSet'.Str::studly($key)))
+            $this->{$method}($value);
+        elseif ( in_array($key, array('slug', 'type', 'value')) )
+            $this->$key = $value;
+        else
+        {
+            if ($this->isProperty($key))
+                $this->setProperty($key, $value);
+            else
+                $this->setAttr($key, $value);
+        }
+        return $this;
+    }
+
+    /**
+     * Get an attribute from the container.
+     *
+     * @param  string  $key
+     * @param  mixed   $default
+     * @return mixed
+     */
+    public function get($key, $default = null)
+    {
+        if ( in_array($key, array('slug', 'type', 'value')) )
+            return $this->$key;
+
+        if ($this->isProperty($key))
+            $value = $this->getProperty($key, $default);
+        else
+            $value = $this->getAttr($key, $default);
+
+        if (method_exists($this, $method = 'onGet'.Str::studly($key)))
+            return $this->{$method}($value ?: $default);
+
+        return $value;
+    }
+
+    /**
+     * @param array $properties
+     * @return $this
+     */
+    public function setProperties(array $properties)
+    {
+        foreach ($properties as $name => $value)
+        {
+            $this->setProperty($name, $value);
+        }
+        return $this;
+    }
+
+    /**
+     * @param $properties
+     * @return $this
+     */
+    public function appendProperties($properties)
+    {
+        $this->properties = array_merge($this->properties, $properties);
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getProperties()
+    {
+        return $this->properties;
+    }
+
+    /**
+     * @param $name
+     * @param $value
+     * @return $this
+     */
+    public function setProperty($name, $value)
+    {
+        $this->properties[$name] = $value;
+        return $this;
+    }
+    /**
+     * @param $name
+     * @param mixed $default
+     * @return mixed
+     */
+    public function getProperty($name, $default = null)
+    {
+        if (!$this->hasProperty($name))
+            $value = $default;
+        else
+            $value = $this->properties[$name];
+        return value($value);
+    }
+
+    /**
+     * @param $name
+     * @return $this
+     */
+    public function removeProperty($name)
+    {
+        unset($this->properties[$name]);
+        return $this;
+    }
+
+    /**
+     * @param $key
+     * @return bool
+     */
+    public function isProperty($key)
+    {
+        return array_key_exists($key, $this->properties);
+    }
+
+    /**
+     * @param $key
+     * @return bool
+     */
+    public function hasProperty($key)
+    {
+        return isset($this->properties[$key]);
     }
 
     /**
@@ -120,7 +256,7 @@ class Element {
      */
     public function __get($name)
     {
-        return $this->getAttr($name);
+        return $this->get($name);
     }
 
     /**
@@ -132,7 +268,7 @@ class Element {
      */
     public function __set($name, $value)
     {
-        $this->setAttr($name, $value);
+        $this->set($name, $value);
     }
 
     /**
@@ -146,7 +282,7 @@ class Element {
     public function __call($name, $arguments)
     {
         if ( !sizeof($arguments) )
-            $this->setAttr($name, true);
+            $this->set($name, true);
         elseif ($name == 'class')
             $this->addClass($arguments);
         elseif ( sizeof($arguments) == 1 )

@@ -9,10 +9,11 @@ use Illuminate\Support\Str;
 
 /**
  * Class Form
- * @property string $model
+ * @property \Illuminate\Database\Eloquent\Model|\stdClass $model
  * @property string $actionType
- * @property string $action
+ * @property string|array $action
  * @property array $fieldNames
+ * @property string $rendererName
  */
 class Form extends Element
 {
@@ -27,10 +28,6 @@ class Form extends Element
      */
     protected $_renderer;
     /**
-     * @var \stdClass
-     */
-    protected $model;
-    /**
      * @var array|Field[]
      */
     protected $fields = [], $buffers = [];
@@ -38,24 +35,25 @@ class Form extends Element
      * @var array|Element[]
      */
     protected $rows = [];
-    /**
-     * @var array
-     */
-    protected $fieldNames = [];
-    /**
-     * @var string
-     */
-    protected $action, $actionType, $rendererName;
-    protected $autoLabels = true;
+
+    protected $properties = array(
+        'autoLabels' => true,
+        'model' => null,
+        'action' => [],
+        'actionType' => 'url',
+        'fieldNames' => [],
+        'rendererName' => null,
+    );
 
     /**
      * @param FormBuilderManager $manager
      * @param string $rendererName
      * @param array $attributes
+     * @param array $properties
      */
-    public function __construct(FormBuilderManager $manager, $rendererName, array $attributes = [])
+    public function __construct(FormBuilderManager $manager, $rendererName, array $attributes = [], array $properties = [])
     {
-        parent::__construct($attributes);
+        parent::__construct($attributes, $properties);
         $this->manager = $manager;
         $this->rendererName = $rendererName;
     }
