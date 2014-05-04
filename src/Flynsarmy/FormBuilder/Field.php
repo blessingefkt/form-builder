@@ -4,19 +4,28 @@
  * Class Field
  * @property string $slug
  * @property string $type
- * @property string $value
+ * @property string|mixed $value
+ * @property string $description
+ * @property string $label
+ * @property array $options
+ * @property array $baseNames
+ * @property string $row
+ * @property int $rowSize
  */
 class Field extends Element
 {
+    /**
+     * @var string
+     */
     protected $slug;
-    protected $type;
-    protected $value;
     protected $properties = array(
+        'type' => null,
         'label' => null,
         'description' => null,
         'options' => [],
         'row' => null,
         'rowSize' => 0,
+        'value' => null,
         'baseNames' => [],
     );
 
@@ -27,10 +36,11 @@ class Field extends Element
      * @param string $type
      * @param string|null $value
      * @param array $attributes
+     * @param array $properties
      */
-    public function __construct($slug, $type, $value = null, array $attributes = [])
+    public function __construct($slug, $type, $value = null, array $attributes = [], array $properties = [])
     {
-        parent::__construct($attributes);
+        parent::__construct($attributes, $properties);
         $this->slug = $slug;
         $this->type($type);
         $this->value($value);

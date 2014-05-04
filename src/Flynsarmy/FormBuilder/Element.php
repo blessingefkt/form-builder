@@ -29,8 +29,6 @@ class Element {
     {
         if (method_exists($this, $method = 'onSet'.Str::studly($key)))
             $this->{$method}($value);
-        elseif ( in_array($key, array('slug', 'type', 'value')) )
-            $this->$key = $value;
         else
         {
             if ($this->isProperty($key))
