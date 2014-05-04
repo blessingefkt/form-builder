@@ -33,7 +33,7 @@ class Form extends Element
     /**
      * @var array|Field[]
      */
-    protected $fields = [];
+    protected $fields = [], $buffers = [];
     /**
      * @var array|Element[]
      */
@@ -41,9 +41,7 @@ class Form extends Element
     /**
      * @var array
      */
-    protected $fieldNames = [],
-        $fieldPropertyBuffer = [],
-        $fieldAttributeBuffer = [];
+    protected $fieldNames = [];
     /**
      * @var string
      */
@@ -74,10 +72,25 @@ class Form extends Element
         if (is_null($rowId)) $rowId = Str::random(8);
         $this->rows[$rowId] = new Element(['id' => 'row-'.$rowId]);
         $this->rows[$rowId]->addClass('field-row');
-        $this->addBufferProperties(['row' => $rowId]);
-        $this->addBufferAttributes(['class' => ['row-'.$rowId]]);
-        call_user_func($closure, $this);
+        $this->buffer($closure, ['row' => $rowId]);
         return $this->rows[$rowId];
+    }
+
+    /**
+     * @param callable $callable
+     * @param array $properties
+     * @return $this
+     */
+    public function buffer(callable $callable, array $properties = [])
+    {
+        $bufferId = Str::random();
+        $this->buffers[$bufferId] = [];
+        call_user_func($callable, $this);
+        $fields = array_pull($this->buffers, $bufferId, []);
+        foreach ($fields as $field) {
+            $field->setProperties($properties);
+        }
+        return $this;
     }
 
     /**
@@ -248,12 +261,14 @@ class Form extends Element
     protected function addAtPosition($position, $slug, $type = null)
     {
         $field = new Field($slug, $type ?: 'text');
-        $attributes = $this->getBufferAttributes();
-        $field->mergeAttributes($attributes);
-        $properties = $this->getBufferProperties();
-        $field->appendProperties($properties);
         $this->fire('newField', $field);
         $this->fire('new'.Str::studly($field->type).'Field', $field);
+        if (!empty($this->buffers))
+        {
+            end($this->buffers);
+            $key = key($this->buffers);
+            $this->buffers[$key][] = $field;
+        }
         $this->fields = ArrayHelper::insert($this->fields, [$field->slug => $field], $position);
         return $field;
     }
@@ -484,60 +499,8 @@ class Form extends Element
     }
 
     /**
-     * Append attributes to the attribute buffer
-     * @param array $attributes
-     * @return $this
-     */
-    public function addBufferAttributes(array $attributes = [])
-    {
-        $this->fieldAttributeBuffer[] = $attributes;
-        return $this;
-    }
-
-    /**
-     * Pop that last added attributes off the buffer
-     * @return array
-     */
-    public function getBufferAttributes()
-    {
-        $result = array_pop($this->fieldAttributeBuffer);
-        return $result ?: [];
-    }
-
-    /**
-     * Append properties to the property buffer
-     * @param array $properties
-     * @return array
-     */
-    public function addBufferProperties(array $properties = [])
-    {
-        $this->fieldPropertyBuffer[] = $properties;
-        return $this;
-    }
-
-    /**
-     * Pop that last added properties off the buffer
-     * @return $this
-     */
-    public function getBufferProperties()
-    {
-        $result = array_pop($this->fieldPropertyBuffer);
-        return $result ?: [];
-    }
-
-    /**
-     * Clear field property and attribute buffers
-     * @return $this
-     */
-    public function clearBuffers()
-    {
-        $this->fieldPropertyBuffer = [];
-        $this->fieldAttributeBuffer = [];
-        return $this;
-    }
-
-    /**
      * @param mixed $model
+     * @return $this
      */
     public function setModel($model)
     {
