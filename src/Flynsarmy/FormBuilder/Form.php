@@ -72,18 +72,18 @@ class Form extends Element
         if (is_null($rowId)) $rowId = 'row-'.Str::random(8);
         $this->rows[$rowId] = new Element(['id' => $rowId]);
         $this->rows[$rowId]->addClass('field-row');
-        $this->buffer($closure, ['row' => $rowId]);
+        $this->buffer(['row' => $rowId], $closure);
         return $this->rows[$rowId];
     }
 
     /**
-     * @param callable $callable
      * @param array $properties
+     * @param callable $callable
      * @return $this
      */
-    public function buffer(callable $callable, array $properties = [])
+    public function buffer(array $properties, callable $callable)
     {
-        $bufferId = Str::random();
+        $bufferId = count($this->buffers)+1;
         $this->buffers[$bufferId] = [];
         call_user_func($callable, $this);
         $fields = array_pull($this->buffers, $bufferId, []);
