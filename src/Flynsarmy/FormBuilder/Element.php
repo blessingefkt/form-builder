@@ -48,9 +48,6 @@ class Element {
      */
     public function get($key, $default = null)
     {
-        if ( in_array($key, array('slug', 'type', 'value')) )
-            return $this->$key;
-
         if ($this->isProperty($key))
             $value = $this->getProperty($key, $default);
         else

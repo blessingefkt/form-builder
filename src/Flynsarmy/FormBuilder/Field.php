@@ -1,4 +1,5 @@
 <?php namespace Flynsarmy\FormBuilder;
+use Illuminate\Support\Str;
 
 /**
  * Class Field
@@ -45,6 +46,18 @@ class Field extends Element
         $this->type($type);
         $this->value($value);
     }
+
+    /**
+     * @param string $key
+     * @param null $default
+     * @return mixed|string
+     */
+    public function get($key, $default = null)
+    {
+        if ($key == 'slug') return $this->slug;
+        return parent::get($key, $default);
+    }
+
 
     /**
      * Set the field type.
