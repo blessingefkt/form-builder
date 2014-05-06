@@ -27,15 +27,10 @@ class Element {
      */
     public function set($key, $value)
     {
-        if (method_exists($this, $method = 'onSet'.Str::studly($key)))
-            $this->{$method}($value);
+        if ($this->isProperty($key))
+            $this->setProperty($key, $value);
         else
-        {
-            if ($this->isProperty($key))
-                $this->setProperty($key, $value);
-            else
-                $this->setAttr($key, $value);
-        }
+            $this->setAttr($key, $value);
         return $this;
     }
 
@@ -52,9 +47,6 @@ class Element {
             $value = $this->getProperty($key, $default);
         else
             $value = $this->getAttr($key, $default);
-
-        if (method_exists($this, $method = 'onGet'.Str::studly($key)))
-            return $this->{$method}($value ?: $default);
 
         return $value;
     }
@@ -97,7 +89,10 @@ class Element {
      */
     public function setProperty($name, $value)
     {
-        $this->properties[$name] = $value;
+        if (method_exists($this, $method = 'onSet'.Str::studly($name)))
+            $this->{$method}($value);
+        else
+            $this->properties[$name] = $value;
         return $this;
     }
     /**
@@ -111,7 +106,11 @@ class Element {
             $value = $default;
         else
             $value = $this->properties[$name];
-        return value($value);
+        $value = value($value);
+
+        if (method_exists($this, $method = 'onGet'.Str::studly($name)))
+            return $this->{$method}($value);
+        return $value;
     }
 
     /**

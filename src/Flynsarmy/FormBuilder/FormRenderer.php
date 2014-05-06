@@ -37,4 +37,10 @@ interface FormRenderer
      * @param Form $form
      */
     public function setFormBinders(Form $form);
+
+    /**
+     * @param $type
+     * @return bool
+     */
+    public function isValidType($type);
 }

@@ -3,6 +3,7 @@
 use Closure;
 use Flynsarmy\FormBuilder\Exceptions\FieldAlreadyExists;
 use Flynsarmy\FormBuilder\Exceptions\FieldNotFound;
+use Flynsarmy\FormBuilder\Exceptions\UnknownType;
 use Flynsarmy\FormBuilder\Helpers\ArrayHelper;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -250,15 +251,19 @@ class Form extends Element
      * Add a new field to the form at a given position
      * binders: newField, new{Fieldtype}Field
      *
-     * @param  integer $position     Array index position to add the field
-     * @param  string  $slug           Unique identifier for this field
-     * @param  string $type          Type of field, defaults to 'text'
+     * @param  integer $position Array index position to add the field
+     * @param  string $slug Unique identifier for this field
+     * @param  string $type Type of field, defaults to 'text'
      *
+     * @throws Exceptions\UnknownType
      * @return \Flynsarmy\FormBuilder\Field
      */
     protected function addAtPosition($position, $slug, $type = null)
     {
-        $field = new Field($this, $slug, $type ?: 'text');
+        if (is_null($type)) $type = 'text';
+        if (!$this->isValidType($type))
+            throw new UnknownType($type);
+        $field = new Field($this, $slug, $type);
         $field->row = 'row-'.count($this->fields)*rand(1, 10).count($this->fields);
         $this->fire('newField', $field);
         $this->fire('new'.Str::studly($field->type).'Field', $field);
@@ -352,7 +357,23 @@ class Form extends Element
     }
 
     /**
-     * Render the form
+     * Render the form, including the form's opening and closing tags
+     * @param string $model
+     * @param array $options
+     * @return string
+     */
+    public function html($model = null, array $options = [])
+    {
+        if (is_array($model))
+        {
+            $options = $model; $model = null;
+        }
+        if ($model) $this->model($model);
+        return $this->open($options).$this->render().$this->close();
+    }
+
+    /**
+     * Render the form's fields
      *
      * @return string
      */
@@ -514,6 +535,15 @@ class Form extends Element
     }
 
     /**
+     * @param $type
+     * @return bool
+     */
+    public function isValidType($type)
+    {
+        return $this->manager->isMacro($type) || $this->getRenderer()->isValidType($type);
+    }
+
+    /**
      * @param mixed $model
      * @return $this
      */
@@ -611,6 +641,37 @@ class Form extends Element
     public function autoLabelsEnabled()
     {
         return $this->autoLabels;
+    }
+
+    /**
+     * Dynamically set properties and settings
+     * calling $form->add{Fieldtype}($slug [,$label]) will add a new field to the form
+     *
+     * @param  string $name      Setting name
+     * @param  array  $arguments Setting value(s)
+     *
+     * @return $this|\Flynsarmy\FormBuilder\Field
+     */
+    public function __call($name, $arguments)
+    {
+        if (preg_match("/add([A-Z][\w]+)/", $name, $matched))
+        {
+            $type = lcfirst($matched[1]);
+            $slug = array_get($arguments, 0);
+            $field = $this->add($slug, $type);
+            $label = array_get($arguments, 1);
+            if ($label)
+                $field->label($label);
+            return $field;
+        }
+        if ( !sizeof($arguments) )
+            $this->set($name, true);
+        elseif ($name == 'class')
+            $this->addClass($arguments);
+        elseif ( sizeof($arguments) == 1 )
+            $this->setAttr($name, $arguments[0]);
+
+        return $this;
     }
 
     /**

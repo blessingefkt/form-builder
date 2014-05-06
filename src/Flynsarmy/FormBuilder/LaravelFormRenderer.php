@@ -23,6 +23,15 @@ class LaravelFormRenderer implements FormRenderer
     }
 
     /**
+     * @param $type
+     * @return bool
+     */
+    public function isValidType($type)
+    {
+        return method_exists($this, $type.'Field');
+    }
+
+    /**
      * Add binders to the form
      * @param Form $form
      */
@@ -81,18 +90,17 @@ class LaravelFormRenderer implements FormRenderer
      *
      * @return string
      */
-    public  function field(Field $field)
+    public function field(Field $field)
     {
-        if (method_exists($this, $field->type))
-            return $this->{$field->type}($field);
-        else
-            return $this->input($field);
+        if (!$this->isValidType($field->type))
+            return $this->inputField($field);
+        return $this->{$field->type.'Field'}($field);
     }
 
     /**
      * @return string
      */
-    public function token()
+    public function tokenField()
     {
         return $this->builder->token();
     }
@@ -101,7 +109,7 @@ class LaravelFormRenderer implements FormRenderer
      * @param Field $field
      * @return string
      */
-    public function label(Field $field)
+    public function labelField(Field $field)
     {
         return $this->builder->label($field->name, $field->value, $field->getAttributes());
     }
@@ -110,7 +118,7 @@ class LaravelFormRenderer implements FormRenderer
      * @param Field $field
      * @return string
      */
-    public function input(Field $field)
+    public function inputField(Field $field)
     {
         return $this->builder->input($field->type, $field->name, $field->value, $field->getAttributes());
     }
@@ -119,7 +127,7 @@ class LaravelFormRenderer implements FormRenderer
      * @param Field $field
      * @return string
      */
-    public function text(Field $field)
+    public function textField(Field $field)
     {
         return $this->builder->text($field->name, $field->value, $field->getAttributes());
     }
@@ -128,7 +136,7 @@ class LaravelFormRenderer implements FormRenderer
      * @param Field $field
      * @return string
      */
-    public function password(Field $field)
+    public function passwordField(Field $field)
     {
         return $this->builder->password($field->name, $field->getAttributes());
     }
@@ -137,7 +145,7 @@ class LaravelFormRenderer implements FormRenderer
      * @param Field $field
      * @return string
      */
-    public function hidden(Field $field)
+    public function hiddenField(Field $field)
     {
         return $this->builder->hidden($field->name, $field->value, $field->getAttributes());
     }
@@ -146,7 +154,7 @@ class LaravelFormRenderer implements FormRenderer
      * @param Field $field
      * @return string
      */
-    public function email(Field $field)
+    public function emailField(Field $field)
     {
         return $this->builder->email($field->name, $field->value, $field->getAttributes());
     }
@@ -155,7 +163,7 @@ class LaravelFormRenderer implements FormRenderer
      * @param Field $field
      * @return string
      */
-    public function url(Field $field)
+    public function urlField(Field $field)
     {
         return $this->builder->url($field->name, $field->value, $field->getAttributes());
     }
@@ -164,7 +172,7 @@ class LaravelFormRenderer implements FormRenderer
      * @param Field $field
      * @return string
      */
-    public function file(Field $field)
+    public function fileField(Field $field)
     {
         return $this->builder->file($field->name, $field->getAttributes());
     }
@@ -173,7 +181,7 @@ class LaravelFormRenderer implements FormRenderer
      * @param Field $field
      * @return string
      */
-    public function textarea(Field $field)
+    public function textareaField(Field $field)
     {
         return $this->builder->textarea($field->name, $field->value, $field->getAttributes());
     }
@@ -182,7 +190,7 @@ class LaravelFormRenderer implements FormRenderer
      * @param Field $field
      * @return string
      */
-    public function select(Field $field)
+    public function selectField(Field $field)
     {
         return $this->builder->select($field->name, $field->options ?: [], $field->value, $field->getAttributes());
     }
@@ -191,7 +199,7 @@ class LaravelFormRenderer implements FormRenderer
      * @param Field $field
      * @return string
      */
-    public function selectRange(Field $field)
+    public function selectRangeField(Field $field)
     {
         return $this->builder->selectRange($field->name, $field->begin, $field->end, $field->selected, $field->getAttributes());
     }
@@ -200,7 +208,7 @@ class LaravelFormRenderer implements FormRenderer
      * @param Field $field
      * @return string
      */
-    public function selectYear(Field $field)
+    public function selectYearField(Field $field)
     {
         return $this->selectRange($field);
     }
@@ -209,7 +217,7 @@ class LaravelFormRenderer implements FormRenderer
      * @param Field $field
      * @return string
      */
-    public function selectMonth(Field $field)
+    public function selectMonthField(Field $field)
     {
         return $this->builder->selectMonth($field->name, $field->selected, $field->getAttributes());
     }
@@ -218,7 +226,7 @@ class LaravelFormRenderer implements FormRenderer
      * @param Field $field
      * @return string
      */
-    public function checkbox(Field $field)
+    public function checkboxField(Field $field)
     {
         return $this->builder->checkbox($field->name, $field->value, $field->checked, $field->getAttributes());
     }
@@ -227,7 +235,7 @@ class LaravelFormRenderer implements FormRenderer
      * @param Field $field
      * @return string
      */
-    public function radio(Field $field)
+    public function radioField(Field $field)
     {
         return $this->builder->radio($field->name, $field->value,$field->checked, $field->getAttributes());
     }
@@ -236,7 +244,7 @@ class LaravelFormRenderer implements FormRenderer
      * @param Field $field
      * @return string
      */
-    public function reset(Field $field)
+    public function resetField(Field $field)
     {
         return $this->builder->reset($field->value, $field->getAttributes());
     }
@@ -245,7 +253,7 @@ class LaravelFormRenderer implements FormRenderer
      * @param Field $field
      * @return string
      */
-    public function image(Field $field)
+    public function imageField(Field $field)
     {
         return $this->builder->image($field->url, $field->name, $field->getAttributes());
     }
@@ -254,7 +262,7 @@ class LaravelFormRenderer implements FormRenderer
      * @param Field $field
      * @return string
      */
-    public function submit(Field $field)
+    public function submitField(Field $field)
     {
         return $this->builder->submit($field->value, $field->getAttributes());
     }
@@ -263,7 +271,7 @@ class LaravelFormRenderer implements FormRenderer
      * @param Field $field
      * @return string
      */
-    public function button(Field $field)
+    public function buttonField(Field $field)
     {
         return $this->builder->button($field->value, $field->getAttributes());
     }

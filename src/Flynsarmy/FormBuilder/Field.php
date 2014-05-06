@@ -2,6 +2,14 @@
 
 /**
  * Class Field
+ * @method Field slug()	slug(string $slug)
+ * @method Field description()	description(string $description)
+ * @method Field label()	label(string $label)
+ * @method Field options()	options(array $options)
+ * @method Field baseNames()	baseNames(array $baseNames)
+ * @method Field row()	row(\Closure $row, string $rowId)
+ * @method Field rowSize()	rowSize(int $rowSize)
+ * @method Field skip()	skip(boolean $skip)
  * @property string $slug
  * @property string $type
  * @property string|mixed $value
@@ -20,6 +28,7 @@ class Field extends Element
      */
     protected $slug;
     protected $properties = array(
+        'name' => null,
         'type' => null,
         'label' => null,
         'description' => null,
