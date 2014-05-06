@@ -4,30 +4,36 @@ use Flynsarmy\FormBuilder\BinderInterface;
 
 trait Bindable
 {
-    protected $bindings = array();
-
+    /**
+     * @var array|callable[]
+     */
+    protected $bindings = [];
+    /**
+     * @var array|BinderInterface[]
+     */
+    protected $binders = [];
+    /**
+     * @var array|string[]
+     */
+    protected $binderMethods =  ['newField', 'beforeField', 'afterField',
+        'beforeRow', 'afterRow', 'afterForm', 'beforeForm'];
 
     /**
      * @param BinderInterface $binder
+     * @param string $name  defaults to binder class name
      * @return $this
      */
-    public function addBinder(BinderInterface $binder)
+    public function addBinder(BinderInterface $binder, $name = null)
     {
-        $class = get_class($binder);
-        $this->bind('newField', [$binder, 'newField'], $class);
-        $this->bind('beforeField', [$binder, 'beforeField'], $class);
-        $this->bind('afterField', [$binder, 'afterField'], $class);
-        $this->bind('beforeRow', [$binder, 'beforeRow'], $class);
-        $this->bind('afterRow', [$binder, 'afterRow'], $class);
-        $this->bind('afterForm', [$binder, 'afterForm'], $class);
-        $this->bind('beforeForm', [$binder, 'beforeForm'], $class);
+        if (!$name)  $name = get_class($binder);
+        $this->binders[$name] = $binder;
         return $this;
     }
 
     /**
      * @param $binding
      * @param mixed $default
-     * @return array
+     * @return mixed|null
      */
     public function getBinding($binding, $default=NULL)
     {
@@ -57,13 +63,9 @@ trait Bindable
      * @param $identifier
      * @return $this
      */
-    public function unbindId($identifier)
+    public function removeBinder($identifier)
     {
-        foreach($this->bindings as $event => $callables)
-        {
-            unset($callables[$identifier]);
-            $this->bindings[$event] = $callables;
-        }
+        unset($this->binders[$identifier]);
         return $this;
     }
 
@@ -91,10 +93,19 @@ trait Bindable
         $event = array_shift($args);
         $output = '';
         if ( isset($this->bindings[$event]) )
+        {
+            if (in_array($event, $this->binderMethods))
+            {
+                foreach ($this->binders as $binder)
+                {
+                    $output .= call_user_func_array([$binder, $event], $args);
+                }
+            }
             foreach ($this->bindings[$event] as $callable)
             {
                 $output .= call_user_func_array($callable, $args);
             }
+        }
         return $output;
     }
 }
