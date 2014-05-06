@@ -107,6 +107,17 @@ class Form extends Element
     }
 
     /**
+     * @param string $value
+     * @param string $slug
+     * @return Field
+     */
+    public function addSubmit($value = 'Submit', $slug = 'submit')
+    {
+        $field = $this->add($slug, 'submit')->value($value);
+        return $field;
+    }
+
+    /**
      * Set the form's action attribute to resolve to a named route
      * @param $action
      * @return $this
