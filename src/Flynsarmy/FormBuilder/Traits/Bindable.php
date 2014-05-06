@@ -92,15 +92,17 @@ trait Bindable
         $args = func_get_args();
         $event = array_shift($args);
         $output = '';
+
+        if (in_array($event, $this->binderMethods))
+        {
+            foreach ($this->binders as $binder)
+            {
+                $output .= call_user_func_array([$binder, $event], $args);
+            }
+        }
+
         if ( isset($this->bindings[$event]) )
         {
-            if (in_array($event, $this->binderMethods))
-            {
-                foreach ($this->binders as $binder)
-                {
-                    $output .= call_user_func_array([$binder, $event], $args);
-                }
-            }
             foreach ($this->bindings[$event] as $callable)
             {
                 $output .= call_user_func_array($callable, $args);
