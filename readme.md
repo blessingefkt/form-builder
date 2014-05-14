@@ -24,10 +24,10 @@ Create a form, add fields, render.
 
 ```php
 $form = FormBuilder::form();
-
-//$form->add('<unique identifier>')->type('<Same as Form::$type facade>')->with('<any args required by Form::$type facade>');
-$form->add('first_name')->type('text')->with('first_name');
-$form->add('gender')->type('select')->with('gender', ['m'=>'Male', 'f'=>'Female']);
+$form->action('UserController@create')
+//$form->add[FieldType]([field_slug] [, Field Label]);
+$form->addText('first_name', 'First Name');
+$form->addSelect('gender')->options(['male'=>'Male', 'female'=>'Female', 'none'=>'Not Telling']);
 
 $form->render();
 ```
@@ -36,7 +36,7 @@ Need to edit or remove a field?
 
 ```php
 // Set field with id 'gender' to have 3 options instead of 2.
-$form->get('gender')->options(['m'=>'Male', 'f'=>'Female', 'n'=>'Not Telling']);
+$form->getField('gender')->options(['m'=>'Male', 'f'=>'Female', 'n'=>'Not Telling']);
 
 // Remove the gender field
 $form->remove('gender');
@@ -56,6 +56,7 @@ use Iyoworks\FormBuilder\Form;
 use Iyoworks\FormBuilder\Field;
 // Closure support for FormBuilder
 $form = FormBuilder::form(function(Form $form) {
+    $form->url('users/create');
 	$form->addText('first_name');
     $form->addSelect('gender'->options(['M'=>'Male', 'F'=>'Female']);
 })->html();
@@ -124,6 +125,7 @@ FormBuilder::bind('beforeField', function(Form $form, Field $field) {
         return $output . '</div>';
 	});
 $form = FormBuilder::form(function(Form $form) {
+    $form->route('user.create')
 	$form->addText('first_name')->label('First Name');
 	$form->addText('last_name')->label('Last Name');
 });

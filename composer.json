@@ -26,8 +26,8 @@
         "mockery/mockery": "0.9.*@dev"
     },
     "autoload": {
-        "psr-0": {
-            "Flynsarmy\\FormBuilder": "src/"
+        "psr-4": {
+            "Iyoworks\\FormBuilder": "src/Iyoworks/FormBuilder"
         }
     },
     "minimum-stability": "stable"
