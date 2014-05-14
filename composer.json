@@ -27,7 +27,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Iyoworks\\FormBuilder": "src/Iyoworks/FormBuilder"
+            "Iyoworks\\FormBuilder\\": "src/Iyoworks/FormBuilder"
         }
     },
     "minimum-stability": "stable"
