@@ -122,6 +122,17 @@ class Form extends Element
     }
 
     /**
+     * @param string $value
+     * @param string $slug
+     * @return Field
+     */
+    public function addRaw($slug, $value)
+    {
+        $field = $this->add($slug, Field::RAW_FIELD_TYPE)->value($value);
+        return $field;
+    }
+
+    /**
      * Set the form's action attribute to resolve to a named route
      * @param $action
      * @return $this
@@ -524,7 +535,9 @@ class Form extends Element
 
         $output .= $this->fire('beforeField', $this, $field);
 
-        if ($this->manager->isMacro($field->type))
+        if ($field->type == Field::RAW_FIELD_TYPE)
+            $fieldHtml = $field->value;
+        elseif ($this->manager->isMacro($field->type))
             $fieldHtml = $this->manager->callMacro($field->type, $field, $this->getRenderer());
         else
             $fieldHtml = $this->getRenderer()->field($field);

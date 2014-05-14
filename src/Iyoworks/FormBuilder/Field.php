@@ -23,6 +23,7 @@
  */
 class Field extends Element
 {
+    const RAW_FIELD_TYPE = 'raw';
     /**
      * @var string
      */
