@@ -1,12 +1,12 @@
 {
-    "name": "iyoworks/form-builder",
+    "name": "iyoworks/form-maker",
     "keywords": ["laravel", "form", "builder"],
     "license": "MIT",
-    "description": "A flexible form builder which utilizes Laravel's Form facade.",
+    "description": "An Object Oriented form builder that extracts form presentation from form creation. Based on Flyn San's Form Builder.",
     "authors": [
         {
-            "name": "Flyn San",
-            "email": "flynsarmy@gmail.com"
+            "name": "Blessing Osakue",
+            "email": "iyoworks@gmail.com"
         }
     ],
     "repositories": [
