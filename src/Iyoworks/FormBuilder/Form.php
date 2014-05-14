@@ -568,7 +568,9 @@ class Form extends Element
      */
     public function isValidType($type)
     {
-        return $this->manager->isMacro($type) || $this->getRenderer()->isValidType($type);
+        return $type == Field::RAW_FIELD_TYPE
+        || $this->manager->isMacro($type)
+        || $this->getRenderer()->isValidType($type);
     }
 
     /**
