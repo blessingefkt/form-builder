@@ -1,5 +1,5 @@
 {
-    "name": "iyoworks/form-maker",
+    "name": "iyoworks/form-builder",
     "keywords": ["laravel", "form", "builder"],
     "license": "MIT",
     "description": "An Object Oriented form builder that extracts form presentation from form creation. Based on Flyn San's Form Builder.",

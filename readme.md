@@ -1,29 +1,20 @@
 ## Laravel Form Builder
 
-[![Build Status](https://travis-ci.org/Flynsarmy/laravel-form-builder.png?branch=master)](https://travis-ci.org/Flynsarmy/laravel-form-builder)
-
 ### A simple and intuitive form builder
-
-Laravel Form Builder has a relatively simple goal. Allow users to create a Form
-object, add fields to it and render when ready. All the relevant HTML will be
-spit out. Form Builder uses Laravel's Form facade and will render any field
-supported by it including macros.
-
+Based on https://github.com/Flynsarmy/laravel-form-builder
 
 ### Installation
+Require this package in your composer.json and run `composer update` (or run `composer require iyoworks/form-builder:1.0.*` directly):
 
-Require this package in your composer.json and run `composer update` (or run `composer require flynsarmy/form-builder:1.0.*` directly):
-
-	"flynsarmy/form-builder": "1.0.*"
+	"iyoworks/form-builder": "1.0.*"
 
 After updating composer, add the ServiceProvider to the providers array in app/config/app.php
 
-	'Flynsarmy\FormBuilder\FormBuilderServiceProvider',
+	'Iyoworks\FormBuilder\FormBuilderServiceProvider',
 
 and optionally the Facade to the aliases array in the same file. This will allow for global callbacks (more on that later).
 
-	'FormBuilder'     => 'Flynsarmy\FormBuilder\Facades\FormBuilder',
-
+	'FormBuilder'     => 'Iyoworks\FormBuilder\Facades\FormBuilder',
 
 ### Usage
 
@@ -45,7 +36,7 @@ Need to edit or remove a field?
 
 ```php
 // Set field with id 'gender' to have 3 options instead of 2.
-$form->get('gender')->with('gender', ['m'=>'Male', 'f'=>'Female', 'n'=>'Not Telling']);
+$form->get('gender')->options(['m'=>'Male', 'f'=>'Female', 'n'=>'Not Telling']);
 
 // Remove the gender field
 $form->remove('gender');
@@ -61,52 +52,39 @@ $form->addBefore('last_name', 'first_name')->...; // Add first name before last 
 Closures are also supported
 
 ```php
-use Flynsarmy\FormBuilder\Form;
-use Flynsarmy\FormBuilder\Field;
+use Iyoworks\FormBuilder\Form;
+use Iyoworks\FormBuilder\Field;
 // Closure support for FormBuilder
-FormBuilder::form(function(Form $form) {
-	$form
-		// Closure support for add()
-		->add('first_name', function(Field $field) {
-			$field->type('text')->with('first_name');
-		})
-		->add('gender', function(Field $field) {
-			$field->type('select')->with('gender', ['M'=>'Male', 'F'=>'Female']);
-		});
-})->render();
+$form = FormBuilder::form(function(Form $form) {
+	$form->addText('first_name');
+    $form->addSelect('gender'->options(['M'=>'Male', 'F'=>'Female']);
+})->html();
 ```
 
-Because Form Builder uses the Form facade, we can use `Form::model($model)` too!
-
 ```php
-echo Form::model($model),
-    $form->render(),
-Form::close();
+echo $form->open(), $form->render(), $form->close();
+# the same as
+echo $form->html();
 ```
 
 
 #### Field settings
 
-You can assign settings to fields. These are most often used in conjunction with callbacks.
+You can add fields to rows
 
 ```php
-$form->add('first_name')
-	->type('text')->with('first_name', null, ['maxlength' => 10])
-	// Pass any other settings your layout requires. You can use any method name.
-	->label('First Name')
-	->description('Enter your first name')
-	->columns(12)
-	->tab('Details');
-```
-
-To retrieve a setting
-
-```php
-// Retrieving a setting
-$field->label;
-
-// Retrieve all settings
-$field->settings;
+$form->addRow(function($form){
+    $form->addText('first_name', 'First Name')
+    	->label('First Name')
+    	->description('Enter your first name')
+    	->columns(12);
+    $form->addText('last_name', 'Last Name')
+        ->label('First Name')
+        ->description('Enter your last name')
+        ->columns(12);
+});
+$form->addEmail('email', 'Email Address')
+$form->addSubmit('Submit')->addClass('btn btn-block btn-primary');
 ```
 
 #### Callbacks
@@ -137,51 +115,20 @@ or using the optional facade, a global basis
 ```php
 // Global form callbacks
 FormBuilder::bind('beforeField', function(Form $form, Field $field) {
-		return '<div><label>'.$field->label.': </label>';
-	})
-	->bind('afterField', function(Form $form, Field $field) {
-		return '</div>';
-	});
-FormBuilder::form(function(Form $form) {
-	$form->add('first_name')->type('text')->with('first_name')->label('First Name');
-	$form->add('last_name')->type('text')->with('last_name')->label('Last Name');
-})->render();
-```
-
-
-### Exxamples
-
-#### Twitter Bootstrap Integration
-
-```php
-// Add labels and help blocks to fields
-FormBuilder::
-	bind('beforeField', function($field) {
 		return '<div class="form-group"><label>'.$field->label.'</label>';
 	})
-	->bind('afterField', function($field) {
+	->bind('afterField', function(Form $form, Field $field) {
 		$output = '';
-		if ( $field->description )
-			$output .= '<p class="help-block">' . $field->description . '</p>';
-		return $output . '</div>';
+        if ( $field->description )
+            $output .= '<p class="help-block">' . $field->description . '</p>';
+        return $output . '</div>';
 	});
-
 $form = FormBuilder::form(function(Form $form) {
-	$form->add('email', function(Field $field) {
-		$field->type('email')->with('email', null, ['class' => 'form-control', 'placeholder' => 'Enter email'])->label('Email Address');
-	})
-	->add('password', function(Field $field) {
-		$field->type('password')->with('password', ['class' => 'form-control', 'placeholder' => 'Password'])->label('Password');
-	})
-	->add('file_input', function(Field $field) {
-		$field->type('file')->with('file_input')->label('File Input')->description("Example block-level help text here.");
-	})
-	->add('submit', function(Field $field) {
-		$field->type('submit')->with('submit', ['class' => 'btn btn-default']);
-	});
+	$form->addText('first_name')->label('First Name');
+	$form->addText('last_name')->label('Last Name');
 });
 
-echo Form::model($model), $form->render(), Form::close();
+echo $form->html($model);
 ```
 
 ### License
