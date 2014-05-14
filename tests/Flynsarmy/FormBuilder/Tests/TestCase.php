@@ -1,4 +1,4 @@
-<?php namespace Flynsarmy\FormBuilder\Tests;
+<?php namespace Iyoworks\FormBuilder\Tests;
 
 class TestCase extends \Orchestra\Testbench\TestCase
 {

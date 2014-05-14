@@ -1,4 +1,4 @@
-<?php namespace Flynsarmy\FormBuilder\Helpers;
+<?php namespace Iyoworks\FormBuilder\Helpers;
 
 class ArrayHelper
 {

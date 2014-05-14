@@ -1,4 +1,4 @@
-<?php namespace Flynsarmy\FormBuilder\Facades;
+<?php namespace Iyoworks\FormBuilder\Facades;
 
 use Illuminate\Support\Facades\Facade;
 

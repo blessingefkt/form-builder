@@ -1,4 +1,4 @@
-<?php namespace Flynsarmy\FormBuilder;
+<?php namespace Iyoworks\FormBuilder;
 
 
 use Illuminate\Support\Str;
@@ -275,7 +275,7 @@ class Element {
      * @param  string $name      Setting name
      * @param  array  $arguments Setting value(s)
      *
-     * @return \Flynsarmy\FormBuilder\Field
+     * @return \Iyoworks\FormBuilder\Field
      */
     public function __call($name, $arguments)
     {

@@ -1,7 +1,7 @@
-<?php namespace Flynsarmy\FormBuilder\Tests\Unit;
+<?php namespace Iyoworks\FormBuilder\Tests\Unit;
 
-use Flynsarmy\FormBuilder\Tests\TestCase;
-use Flynsarmy\FormBuilder\Form;
+use Iyoworks\FormBuilder\Tests\TestCase;
+use Iyoworks\FormBuilder\Form;
 use Way\Tests\Assert;
 
 /*

@@ -1,7 +1,7 @@
-<?php namespace Flynsarmy\FormBuilder\Tests\Unit\Traits;
+<?php namespace Iyoworks\FormBuilder\Tests\Unit\Traits;
 
-use Flynsarmy\FormBuilder\Tests\TestCase;
-use Flynsarmy\FormBuilder\Helpers\ArrayHelper;
+use Iyoworks\FormBuilder\Tests\TestCase;
+use Iyoworks\FormBuilder\Helpers\ArrayHelper;
 use Way\Tests\Assert;
 
 class BindableTest extends TestCase

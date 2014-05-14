@@ -1,6 +1,6 @@
-<?php namespace Flynsarmy\FormBuilder\Traits;
+<?php namespace Iyoworks\FormBuilder\Traits;
 
-use Flynsarmy\FormBuilder\BinderInterface;
+use Iyoworks\FormBuilder\BinderInterface;
 
 trait Bindable
 {

@@ -1,4 +1,4 @@
-<?php namespace Flynsarmy\FormBuilder;
+<?php namespace Iyoworks\FormBuilder;
 
 
 interface BinderInterface {

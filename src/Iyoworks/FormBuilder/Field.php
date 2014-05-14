@@ -1,4 +1,4 @@
-<?php namespace Flynsarmy\FormBuilder;
+<?php namespace Iyoworks\FormBuilder;
 
 /**
  * Class Field
@@ -79,7 +79,7 @@ class Field extends Element
      *
      * @param  string $type
      *
-     * @return \Flynsarmy\FormBuilder\Field
+     * @return \Iyoworks\FormBuilder\Field
      */
     public function type($type)
     {
@@ -92,7 +92,7 @@ class Field extends Element
      *
      * @param  string $value
      *
-     * @return \Flynsarmy\FormBuilder\Field
+     * @return \Iyoworks\FormBuilder\Field
      */
     public function value($value)
     {
@@ -207,7 +207,7 @@ class Field extends Element
      * @param  string $name      Setting name
      * @param  array  $arguments Setting value(s)
      *
-     * @return \Flynsarmy\FormBuilder\Field
+     * @return \Iyoworks\FormBuilder\Field
      */
     public function __call($name, $arguments)
     {

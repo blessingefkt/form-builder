@@ -1,7 +1,7 @@
-<?php namespace Flynsarmy\FormBuilder;
+<?php namespace Iyoworks\FormBuilder;
 
 
-use Flynsarmy\FormBuilder\Traits\Bindable;
+use Iyoworks\FormBuilder\Traits\Bindable;
 use Illuminate\Html\FormBuilder as Builder;
 use Illuminate\Html\HtmlBuilder;
 

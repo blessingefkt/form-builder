@@ -1,8 +1,8 @@
-<?php namespace Flynsarmy\FormBuilder;
+<?php namespace Iyoworks\FormBuilder;
 
 use Closure;
-use Flynsarmy\FormBuilder\Exceptions\FieldNotFound;
-use Flynsarmy\FormBuilder\Exceptions\RendererNotFound;
+use Iyoworks\FormBuilder\Exceptions\FieldNotFound;
+use Iyoworks\FormBuilder\Exceptions\RendererNotFound;
 
 class FormBuilderManager
 {
@@ -19,7 +19,7 @@ class FormBuilderManager
      *
      * @param  Closure $callback Optional closure accepting a Form object
      * @param string $renderer
-     * @return \Flynsarmy\FormBuilder\Form
+     * @return \Iyoworks\FormBuilder\Form
      */
     public function form(callable $callback = null, $renderer = null)
     {
@@ -88,7 +88,7 @@ class FormBuilderManager
 
     /**
      * @param $name
-     * @return \Flynsarmy\FormBuilder\FormRenderer
+     * @return \Iyoworks\FormBuilder\FormRenderer
      * @throws Exceptions\RendererNotFound
      */
     public function getRenderer($name)
