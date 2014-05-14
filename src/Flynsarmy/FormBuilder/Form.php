@@ -36,6 +36,10 @@ class Form extends Element
      * @var array|Element[]
      */
     protected $rows = [];
+    /**
+     * @var array|string[]
+     */
+    protected $skipAutoLabel = ['hidden', 'submit'];
 
     protected $properties = array(
         'autoLabels' => true,
@@ -513,7 +517,7 @@ class Form extends Element
     {
         $output = '';
 
-        if ($this->autoLabels && !$field->label)
+        if ($this->autoLabels && !in_array($field->type, $this->skipAutoLabel) && is_null($field->label))
             $field->label = Str::title(str_replace('_', ' ', $field->slug));
         if ($this->fieldNames)
             $field->addName($this->fieldNames, true);
