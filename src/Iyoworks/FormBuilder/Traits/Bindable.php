@@ -31,14 +31,14 @@ trait Bindable
     }
 
     /**
-     * @param $binding
+     * @param $event
      * @param mixed $default
      * @return mixed|null
      */
-    public function getBinding($binding, $default=NULL)
+    public function getBinding($event, $default = NULL)
     {
-        if ( isset($this->bindings[$binding]))
-            return $this->bindings[$binding];
+        if (isset($this->bindings[$event]))
+            return $this->bindings[$event];
 
         return $default;
     }
@@ -46,41 +46,31 @@ trait Bindable
     /**
      * @param $event
      * @param callable $callback
-     * @param string $identifier
      * @return $this
      */
-    public function bind($event, callable $callback, $identifier = null)
+    public function bind($event, callable $callback)
     {
-        if ($identifier)
-            $this->bindings[$event][$identifier] = $callback;
-        else
-            $this->bindings[$event][] = $callback;
-
-        return $this;
-    }
-
-    /**
-     * @param $identifier
-     * @return $this
-     */
-    public function removeBinder($identifier)
-    {
-        unset($this->binders[$identifier]);
+        $this->bindings[$event] = $callback;
         return $this;
     }
 
     /**
      * @param $event
-     * @param string $identifier
      * @return $this
      */
-    public function unbind($event, $identifier = null)
+    public function removeBinder($event)
     {
-        if (!is_null($identifier))
-            unset($this->bindings[$event][$identifier]);
-        else
-            unset($this->bindings[$event]);
+        unset($this->binders[$event]);
+        return $this;
+    }
 
+    /**
+     * @param $event
+     * @return $this
+     */
+    public function unbind($event)
+    {
+        unset($this->bindings[$event]);
         return $this;
     }
 
@@ -103,10 +93,7 @@ trait Bindable
 
         if ( isset($this->bindings[$event]) )
         {
-            foreach ($this->bindings[$event] as $callable)
-            {
-                $output .= call_user_func_array($callable, $args);
-            }
+            $output .= call_user_func_array($this->bindings[$event], $args);
         }
         return $output;
     }
