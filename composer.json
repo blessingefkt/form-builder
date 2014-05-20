@@ -18,17 +18,15 @@
     "require": {
         "php": ">=5.3.0",
         "illuminate/support": "~4",
-        "illuminate/html": "~4"
+        "iyoworks/html": "dev-master"
     },
     "require-dev": {
-        "orchestra/testbench": "2.1.*",
-        "way/laravel-test-helpers": "dev-master",
-        "mockery/mockery": "0.9.*@dev"
+
     },
     "autoload": {
         "psr-4": {
             "Iyoworks\\FormBuilder\\": "src/Iyoworks/FormBuilder"
         }
     },
-    "minimum-stability": "stable"
+    "minimum-stability": "dev"
 }
