@@ -157,9 +157,10 @@ class FormBuilderManager {
 	 */
 	public function __call($fieldType, $arguments)
 	{
-		if (in_array($fieldType, ['raw', 'submit']))
+		$method = 'add' . Str::studly($fieldType);
+		if (method_exists($this, $method))
 		{
-			return call_user_func([$this->_form(), 'add' . Str::studly($fieldType)], $arguments);
+			return call_user_func([$this->_form(), $method], $arguments);
 		}
 		return $this->_form()->addDynamicField($fieldType, $arguments);
 	}

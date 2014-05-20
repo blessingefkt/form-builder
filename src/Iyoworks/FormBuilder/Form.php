@@ -123,13 +123,24 @@ class Form extends Element {
 	}
 
 	/**
+	 * @param string $slug
+	 * @param string $value
+	 * @return Field
+	 */
+	public function addHidden($slug, $value)
+	{
+		$field = $this->add($slug, 'hidden')->value($value)->container(false);
+		return $field;
+	}
+
+	/**
 	 * @param string $value
 	 * @param string $slug
 	 * @return Field
 	 */
 	public function addRaw($slug, $value)
 	{
-		$field = $this->add($slug, Field::RAW_FIELD_TYPE)->value($value);
+		$field = $this->add($slug, Field::RAW_FIELD_TYPE)->value($value)->container(false);
 		return $field;
 	}
 
