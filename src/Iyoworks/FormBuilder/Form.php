@@ -707,7 +707,14 @@ class Form extends Element {
 	 */
 	public function __call($name, $arguments)
 	{
-		if (preg_match("/add([A-Z][\w]+)/", $name, $matched))
+		if (preg_match("/add([A-Z][\w]+)(After|Before)([A-Z][\w]+)/", $name, $matched))
+		{
+			$type = lcfirst($matched[1]);
+			$isBefore = $matched[2] == 'Before';
+			$reference = lcfirst($matched[3]);
+			return $this->addDynamicField($type, $arguments, $reference, $isBefore);
+		}
+		elseif (preg_match("/add([A-Z][\w]+)/", $name, $matched))
 		{
 			$type = lcfirst($matched[1]);
 			return $this->addDynamicField($type, $arguments);
@@ -739,12 +746,28 @@ class Form extends Element {
 	/**
 	 * @param string $type
 	 * @param array $arguments
+	 * @param null $referenceField
+	 * @param bool $before
 	 * @return Field
 	 */
-	public function addDynamicField($type, $arguments)
+	public function addDynamicField($type, $arguments, $referenceField = null, $before = false)
 	{
 		$slug = array_get($arguments, 0);
-		$field = $this->add($slug, $type);
+		if ($referenceField)
+		{
+			if ($before)
+			{
+				$field = $this->addBefore($referenceField, $slug, $type);
+			}
+			else
+			{
+				$field = $this->addAfter($referenceField, $slug, $type);
+			}
+		}
+		else
+		{
+			$field = $this->add($slug, $type);
+		}
 		$label = array_get($arguments, 1);
 		if ($label)
 		{
