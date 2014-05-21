@@ -262,16 +262,28 @@ class LaravelFormRenderer implements FormRenderer {
 	 */
 	public function submitField(Field $field)
 	{
-		return $this->builder->submit($field->value, $field->getAttributes());
+		return $this->buttonField($field, 'submit');
 	}
 
 	/**
 	 * @param Field $field
+	 * @param string $type
 	 * @return string
 	 */
-	public function buttonField(Field $field)
+	public function buttonField(Field $field, $type = 'button')
 	{
-		return $this->builder->button($field->value, $field->getAttributes());
+		$attributes = $field->getAttributes();
+		$attributes['type'] = $type;
+		if ($field->label)
+		{
+			$value = $field->label;
+			$attributes['value'] = $field->value;
+		}
+		else
+		{
+			$value = $field->value;
+		}
+		return $this->builder->button($value, $attributes);
 	}
 
 } 
