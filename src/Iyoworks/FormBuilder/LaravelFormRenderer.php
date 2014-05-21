@@ -66,7 +66,7 @@ class LaravelFormRenderer implements FormRenderer {
 	public function rowOpen(Element $row)
 	{
 		$_atts = $this->htmlBuilder->attributes($row->getAttributes());
-		return '<div' . $_atts . '>';
+		return '<div' . $_atts . '><div class="row">';
 	}
 
 	/**
@@ -75,7 +75,7 @@ class LaravelFormRenderer implements FormRenderer {
 	 */
 	public function rowClose(Element $row)
 	{
-		return '</div>';
+		return '</div></div>';
 	}
 
 
