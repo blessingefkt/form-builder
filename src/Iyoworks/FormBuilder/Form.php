@@ -113,12 +113,13 @@ class Form extends Element {
 
 	/**
 	 * @param string $label
+	 * @param null $value
 	 * @param string $slug
 	 * @return Field
 	 */
-	public function addSubmit($label = 'Submit', $slug = 'submit')
+	public function addSubmit($label = 'Submit', $value = null, $slug = 'submit')
 	{
-		$field = $this->add($slug, 'submit')->label($label);
+		$field = $this->add($slug, 'submit')->label($label)->value($value);
 		return $field;
 	}
 
