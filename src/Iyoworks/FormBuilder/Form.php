@@ -389,7 +389,7 @@ class Form extends Element {
 	public function open(array $attributes = array())
 	{
 		$this->mergeAttributes($attributes);
-		return $this->getRenderer()->formOpen($this);
+		return $this->fire('beforeForm', $this) . $this->getRenderer()->formOpen($this);
 	}
 
 	/**
@@ -398,23 +398,16 @@ class Form extends Element {
 	 */
 	public function close()
 	{
-		return $this->getRenderer()->formClose($this);
+		return $this->fire('afterForm', $this) . $this->getRenderer()->formClose($this);
 	}
 
 	/**
 	 * Render the form, including the form's opening and closing tags
-	 * @param string $model
 	 * @param array $options
 	 * @return string
 	 */
-	public function html($model = null, array $options = [])
+	public function html(array $options = [])
 	{
-		if (is_array($model))
-		{
-			$options = $model;
-			$model = null;
-		}
-		if ($model) $this->model($model);
 		return $this->open($options) . $this->render() . $this->close();
 	}
 
@@ -426,8 +419,6 @@ class Form extends Element {
 	public function render()
 	{
 		$output = '';
-
-		$output .= $this->fire('beforeForm', $this);
 
 		// Render a rowless form
 		if (sizeof($this->rows) == count($this->fields))
@@ -454,8 +445,6 @@ class Form extends Element {
 				$output .= $this->renderFields($fields['_default']);
 			}
 		}
-
-		$output .= $this->fire('afterForm', $this);
 
 		return $output;
 	}
