@@ -13,7 +13,6 @@ use Iyoworks\FormBuilder\Helpers\ArrayHelper;
  * @method $this autoLabels()      autoLabels(bool $value)
  * @method $this model()           model(stdClass $value)
  * @method $this action()         action(string $value)
- * @method $this method()         method(string $value)
  * @method $this actionType()      actionType(string $value)
  * @method $this fieldNames()      fieldNames(array $value)
  * @method $this rendererName()   rendererName(string $value)
@@ -194,7 +193,7 @@ class Form extends Element {
 	 * @param $value
 	 * @return $this
 	 */
-	protected function onSetMethod($value)
+	protected function method($value)
 	{
 		$this->setAttr('method', $value);
 		$this->setProperty('method', $value);
