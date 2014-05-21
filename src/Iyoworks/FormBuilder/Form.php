@@ -193,7 +193,7 @@ class Form extends Element {
 	 * @param $value
 	 * @return $this
 	 */
-	protected function method($value)
+	public function method($value)
 	{
 		$this->setAttr('method', $value);
 		$this->setProperty('method', $value);
