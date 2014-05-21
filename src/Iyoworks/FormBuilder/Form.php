@@ -580,7 +580,6 @@ class Form extends Element {
 		if (!$this->_renderer)
 		{
 			$this->_renderer = $this->manager->getRenderer($this->rendererName);
-			$this->_renderer->setFormBinders($this);
 		}
 		return $this->_renderer;
 	}

@@ -1,9 +1,9 @@
 <?php namespace Iyoworks\FormBuilder;
 
 
-use Iyoworks\FormBuilder\Traits\Bindable;
 use Illuminate\Html\FormBuilder as Builder;
 use Illuminate\Html\HtmlBuilder;
+use Iyoworks\FormBuilder\Traits\Bindable;
 
 class LaravelFormRenderer implements FormRenderer
 {
@@ -30,16 +30,6 @@ class LaravelFormRenderer implements FormRenderer
     {
         return method_exists($this, $type.'Field');
     }
-
-    /**
-     * Add binders to the form
-     * @param Form $form
-     */
-    public function setFormBinders(Form $form)
-    {
-
-    }
-
 
     /**
      * @param Form $form
