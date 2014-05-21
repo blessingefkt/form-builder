@@ -108,9 +108,9 @@ class FormBuilderManager {
 		if (!$this->resolvedRenderers[$name])
 		{
 			$callback = $this->renderers[$name];
-			$this->renderers[$name] = call_user_func($callback);
+			$this->resolvedRenderers[$name] = call_user_func($callback);
 		}
-		return $this->renderers[$name];
+		return $this->resolvedRenderers[$name];
 	}
 
 	/**
