@@ -10,6 +10,14 @@ use Iyoworks\FormBuilder\Helpers\ArrayHelper;
 
 /**
  * Class Form
+ * @method $this autoLabels()      autoLabels(bool $value)
+ * @method $this model()           model(stdClass $value)
+ * @method $this action()         action(string $value)
+ * @method $this method()         method(string $value)
+ * @method $this actionType()      actionType(string $value)
+ * @method $this fieldNames()      fieldNames(array $value)
+ * @method $this rendererName()   rendererName(string $value)
+ * @method $this allowFieldOverwrite()   allowFieldOverwrite(bool $value)
  * @property bool $autoLabels
  * @property \Illuminate\Database\Eloquent\Model|\stdClass $model
  * @property string|array $action
@@ -17,14 +25,6 @@ use Iyoworks\FormBuilder\Helpers\ArrayHelper;
  * @property array $fieldNames
  * @property string $rendererName
  * @property bool $allowFieldOverwrite
- * @method $this autoLabels()      autoLabels(bool $value)
- * @method $this model()         model(stdClass $value)
- * @method $this action()         action(string $value)
- * @method $this method()         method(string $value)
- * @method $this actionType()      actionType(string $value)
- * @method $this fieldNames()      fieldNames(array $value)
- * @method $this rendererName()   rendererName(string $value)
- * @method $this allowFieldOverwrite()   allowFieldOverwrite(bool $value)
  */
 class Form extends Element {
 	use Traits\Bindable;
@@ -66,11 +66,13 @@ class Form extends Element {
 	 * @param array $attributes
 	 * @param array $properties
 	 */
-	public function __construct(FormBuilderManager $manager, $rendererName, array $attributes = [], array $properties = [])
+	public function __construct(FormBuilderManager $manager, $rendererName,
+	                            array $attributes = [], array $properties = [])
 	{
 		parent::__construct($attributes, $properties);
 		$this->manager = $manager;
 		$this->rendererName = $rendererName;
+		$this->method('post');
 	}
 
 	/**
@@ -185,6 +187,17 @@ class Form extends Element {
 	{
 		$this->action = $action;
 		$this->actionType = $actionType;
+		return $this;
+	}
+
+	/**
+	 * @param $value
+	 * @return $this
+	 */
+	protected function onSetMethod($value)
+	{
+		$this->setAttr('method', $value);
+		$this->setProperty('method', $value);
 		return $this;
 	}
 
