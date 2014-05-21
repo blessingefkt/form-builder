@@ -10,11 +10,21 @@ use Iyoworks\FormBuilder\Helpers\ArrayHelper;
 
 /**
  * Class Form
+ * @property bool $autoLabels
  * @property \Illuminate\Database\Eloquent\Model|\stdClass $model
- * @property string $actionType
  * @property string|array $action
+ * @property string $actionType
  * @property array $fieldNames
  * @property string $rendererName
+ * @property bool $allowFieldOverwrite
+ * @method $this autoLabels()      autoLabels(bool $value)
+ * @method $this model()         model(stdClass $value)
+ * @method $this action()         action(string $value)
+ * @method $this method()         method(string $value)
+ * @method $this actionType()      actionType(string $value)
+ * @method $this fieldNames()      fieldNames(array $value)
+ * @method $this rendererName()   rendererName(string $value)
+ * @method $this allowFieldOverwrite()   allowFieldOverwrite(bool $value)
  */
 class Form extends Element {
 	use Traits\Bindable;
@@ -38,7 +48,7 @@ class Form extends Element {
 	/**
 	 * @var array|string[]
 	 */
-	protected $skipAutoLabel = ['hidden', 'submit'];
+	protected $skipAutoLabel = ['hidden', 'submit'], $positions = [];
 
 	protected $properties = array(
 		 'autoLabels' => true,
@@ -249,8 +259,8 @@ class Form extends Element {
 	 */
 	public function addBefore($existingId, $slug, $type = null)
 	{
-		$keyPosition = ArrayHelper::getKeyPosition($this->fields, $existingId);
-		if ($keyPosition == -1)
+		$keyPosition = array_search($existingId, $this->positions);
+		if ($keyPosition == false)
 		{
 			throw new FieldNotFound("Field with slug '$existingId' does't exist.");
 		}
@@ -272,8 +282,8 @@ class Form extends Element {
 	 */
 	public function addAfter($existingId, $slug, $type = null)
 	{
-		$keyPosition = ArrayHelper::getKeyPosition($this->fields, $existingId);
-		if ($keyPosition == -1)
+		$keyPosition = array_search($existingId, $this->positions);
+		if ($keyPosition == false)
 		{
 			throw new FieldNotFound("Field with slug '$existingId' does't exist.");
 		}
@@ -317,7 +327,8 @@ class Form extends Element {
 				$this->buffers[$k] = $buffer;
 			}
 		}
-		$this->fields = ArrayHelper::insert($this->fields, [$field->slug => $field], $position);
+		$this->fields[$field->slug] = $field;
+		$this->positions = ArrayHelper::insert($this->positions, [$position => $field->slug], $position);
 		return $field;
 	}
 
@@ -340,6 +351,16 @@ class Form extends Element {
 	}
 
 	/**
+	 * Alias for getField
+	 * @param $slug
+	 * @return Field
+	 */
+	public function find($slug)
+	{
+		return $this->getField($slug);
+	}
+
+	/**
 	 * Determine if a field exists
 	 *
 	 * @param  string $slug Unique identifier for the field
@@ -349,6 +370,27 @@ class Form extends Element {
 	{
 		return isset($this->fields[$slug]);
 	}
+
+//	/**
+//	 * @param string $slug
+//	 * @param string|int $position slug of an existing field or an integer
+//	 */
+//	public function move($slug, $position)
+//	{
+//		if (is_int($position))
+//		{
+//			$pos = $position;
+//		}
+//		else
+//		{
+//			$pos = array_search($this->positions, $slug);
+//				if ($pos == false)
+//				{
+//					throw new FieldNotFound($position);
+//				}
+//		}
+//		ArrayHelper::insert($this->positions, [$position => $slug], $pos);
+//	}
 
 	/**
 	 * Remove a field from the form by slug
@@ -371,15 +413,14 @@ class Form extends Element {
 	}
 
 	/**
-	 * Set the form's model and render the opening tag
+	 * Set the form's model
 	 * @param $model
-	 * @param array $attributes
-	 * @return string
+	 * @return $this
 	 */
-	public function model($model, array $attributes = array())
+	public function model($model)
 	{
 		$this->model = $model;
-		return $this->open($attributes);
+		return $this;
 	}
 
 	/**
@@ -420,11 +461,10 @@ class Form extends Element {
 	public function render()
 	{
 		$output = '';
-
 		// Render a rowless form
 		if (sizeof($this->rows) == count($this->fields))
 		{
-			$output .= $this->renderFields($this->fields);
+			$output .= $this->renderFields($this->getOrderedFields());
 		}
 		else
 		{
@@ -484,10 +524,10 @@ class Form extends Element {
 	{
 		$sorted = array();
 
-		foreach ($this->fields as $field)
+		foreach ($this->getOrderedFields() as $field)
 		{
 			$field_property = $field->getProperty($property, $default);
-			$sorted[$field_property][] = $field;
+			$sorted[$field_property][$field->slug] = $field;
 		}
 
 		return $sorted;
@@ -504,11 +544,10 @@ class Form extends Element {
 		$count = count($fields);
 		$output = $this->fire('beforeRow', $row, $fields);
 		$output .= $this->getRenderer()->rowOpen($row, $fields);
-		foreach ($fields as $field)
+		$output .= $this->renderFields($fields, function ($field) use ($row, $count)
 		{
 			$field->setProperty('rowSize', $count);
-			$output .= $this->renderField($field);
-		}
+		});
 		$output .= $this->getRenderer()->rowClose($row, $fields);
 		$output .= $this->fire('afterRow', $row, $fields);
 		return $output;
@@ -518,17 +557,19 @@ class Form extends Element {
 	 * Render a list of fields.
 	 *
 	 * @param  array|Field[] $fields
+	 * @param callable $callable
 	 * @return string
 	 */
-	protected function renderFields($fields)
+	protected function renderFields($fields, callable $callable = null)
 	{
-		$output = '';
-		foreach ($fields as $field)
+		$outputs = [];
+		foreach ($this->getOrderedFields($fields) as $field)
 		{
 			if ($field->skip) continue;
-			$output .= $this->renderField($field);
+			if ($callable) call_user_func($callable, $field);
+			$outputs[] = $this->renderField($field);
 		}
-		return $output;
+		return join("\n", $outputs);
 	}
 
 	/**
@@ -594,16 +635,6 @@ class Form extends Element {
 		return $type == Field::RAW_FIELD_TYPE
 		|| $this->manager->isMacro($type)
 		|| $this->getRenderer()->isValidType($type);
-	}
-
-	/**
-	 * @param mixed $model
-	 * @return $this
-	 */
-	public function setModel($model)
-	{
-		$this->model = $model;
-		return $this;
 	}
 
 	/**
@@ -774,5 +805,24 @@ class Form extends Element {
 			$field->label($label);
 		}
 		return $field;
+	}
+
+	/**
+	 * @param array|Field[] $fields
+	 * @return array|Field[]
+	 */
+	public function getOrderedFields(array $fields = null)
+	{
+		if (!$fields) $fields = $this->fields;
+		$keys = array_keys($fields);
+		$positions = array_intersect($this->positions, $keys);
+		if ($keys == $positions) return $fields;
+		$_fields = [];
+		foreach ($positions as $field)
+		{
+			$_fields[$field] = $this->fields[$field];
+		}
+
+		return $_fields;
 	}
 }
