@@ -139,7 +139,7 @@ class Form extends Element {
 	 * @param string $value
 	 * @return Field
 	 */
-	public function addHidden($slug, $value)
+	public function addHidden($slug, $value = null)
 	{
 		$field = $this->add($slug, 'hidden')->value($value)->container(false);
 		return $field;
