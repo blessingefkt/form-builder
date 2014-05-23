@@ -55,6 +55,7 @@ class Form extends Element {
 		 'skipAutoLabel' => ['hidden', 'submit', 'button', Field::RAW_FIELD_TYPE],
 		 'autoLabels' => true,
 		 'model' => null,
+		 'slugChar' => '_',
 		 'action' => [],
 		 'actionType' => 'url',
 		 'fieldNames' => [],
@@ -791,14 +792,11 @@ class Form extends Element {
 		$slug = array_get($arguments, 0);
 		if ($referenceField)
 		{
+			$referenceField = Str::slug($referenceField, $this->slugChar);
 			if ($before)
-			{
 				$field = $this->addBefore($referenceField, $slug, $type);
-			}
 			else
-			{
 				$field = $this->addAfter($referenceField, $slug, $type);
-			}
 		}
 		else
 		{
