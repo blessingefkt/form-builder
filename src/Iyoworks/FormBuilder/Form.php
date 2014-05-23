@@ -87,22 +87,24 @@ class Form extends Element {
 	public function addRow(\Closure $closure, $rowId = null)
 	{
 		if (is_null($rowId)) $rowId = 'row-' . Str::random(8);
-		$this->rows[$rowId] = new Element(['id' => $rowId]);
-		$this->rows[$rowId]->addClass('field-row');
-		$this->buffer(['row' => $rowId], $closure);
-		return $this->rows[$rowId];
+		$row = new Element(['id' => $rowId]);
+		$row->addClass('field-row');
+		$this->buffer(['row' => $rowId], $closure, [$row]);
+		return $this->rows[$rowId] = $row;
 	}
 
 	/**
 	 * @param array $properties
 	 * @param callable $callable
+	 * @param array $passIn
 	 * @return $this
 	 */
-	public function buffer(array $properties, callable $callable)
+	public function buffer(array $properties, callable $callable, array $passIn = [])
 	{
 		$bufferId = count($this->buffers) + 1;
 		$this->buffers[$bufferId] = [];
-		call_user_func($callable, $this);
+		array_unshift($passIn, $this);
+		call_user_func_array($callable, $passIn);
 		$fields = array_pull($this->buffers, $bufferId, []);
 		foreach ($fields as $field)
 		{
