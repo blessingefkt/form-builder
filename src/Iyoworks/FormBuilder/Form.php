@@ -10,18 +10,20 @@ use Iyoworks\FormBuilder\Helpers\ArrayHelper;
 
 /**
  * Class Form
- * @method $this autoLabels()      autoLabels(bool $value)
  * @method $this model()           model(stdClass $value)
  * @method $this action()         action(string $value)
  * @method $this actionType()      actionType(string $value)
  * @method $this fieldNames()      fieldNames(array $value)
  * @method $this rendererName()   rendererName(string $value)
+ * @method $this autoLabels()      autoLabels(bool $value)
+ * @method $this skipAutoLabel()      autoLabels(array $value)
  * @method $this allowFieldOverwrite()   allowFieldOverwrite(bool $value)
  * @property bool $autoLabels
  * @property \Illuminate\Database\Eloquent\Model|\stdClass $model
  * @property string|array $action
  * @property string $actionType
  * @property array $fieldNames
+ * @property array $skipAutoLabel
  * @property string $rendererName
  * @property bool $allowFieldOverwrite
  */
@@ -47,10 +49,10 @@ class Form extends Element {
 	/**
 	 * @var array|string[]
 	 */
-	protected $skipAutoLabel = ['hidden', 'submit', 'button'],
-		 $positions = [];
+	protected $positions = [];
 
 	protected $properties = array(
+		 'skipAutoLabel' => ['hidden', 'submit', 'button'],
 		 'autoLabels' => true,
 		 'model' => null,
 		 'action' => [],
