@@ -792,7 +792,7 @@ class Form extends Element {
 		$slug = array_get($arguments, 0);
 		if ($referenceField)
 		{
-			$referenceField = Str::slug($referenceField, $this->slugChar);
+			$referenceField = Str::lower(preg_replace('/([A-Z])/', "{$this->slugChar}\$1", $referenceField));
 			if ($before)
 				$field = $this->addBefore($referenceField, $slug, $type);
 			else
