@@ -52,7 +52,7 @@ class Form extends Element {
 	protected $positions = [];
 
 	protected $properties = array(
-		 'skipAutoLabel' => ['hidden', 'submit', 'button'],
+		 'skipAutoLabel' => ['hidden', 'submit', 'button', Field::RAW_FIELD_TYPE],
 		 'autoLabels' => true,
 		 'model' => null,
 		 'action' => [],
