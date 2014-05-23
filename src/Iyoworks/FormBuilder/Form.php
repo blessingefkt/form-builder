@@ -47,7 +47,8 @@ class Form extends Element {
 	/**
 	 * @var array|string[]
 	 */
-	protected $skipAutoLabel = ['hidden', 'submit'], $positions = [];
+	protected $skipAutoLabel = ['hidden', 'submit', 'button'],
+		 $positions = [];
 
 	protected $properties = array(
 		 'autoLabels' => true,
@@ -329,6 +330,10 @@ class Form extends Element {
 		}
 		$field = new Field($this, $slug, $type);
 		$field->row = 'row-' . count($this->fields) * rand(1, 10) . count($this->fields);
+		if ($this->autoLabels && !in_array($field->type, $this->skipAutoLabel) && is_null($field->label))
+		{
+			$field->label = Str::title(str_replace('_', ' ', $field->slug));
+		}
 		$this->fire('newField', $field);
 		$this->fire('new' . Str::studly($field->type) . 'Field', $field);
 		if (!empty($this->buffers))
@@ -595,10 +600,6 @@ class Form extends Element {
 	{
 		$output = '';
 
-		if ($this->autoLabels && !in_array($field->type, $this->skipAutoLabel) && is_null($field->label))
-		{
-			$field->label = Str::title(str_replace('_', ' ', $field->slug));
-		}
 		if ($this->fieldNames)
 		{
 			$field->addName($this->fieldNames, true);
