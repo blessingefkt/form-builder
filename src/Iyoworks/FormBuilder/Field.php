@@ -199,64 +199,6 @@ class Field extends Element {
 	}
 
 	/**
-	 * Return a property or attribute
-	 *
-	 * @param $name
-	 * @return mixed
-	 */
-	public function __get($name)
-	{
-		return $this->get($name);
-	}
-
-	/**
-	 * Set a property or attribute
-	 *
-	 * @param $name
-	 * @param $value
-	 * @return mixed
-	 */
-	public function __set($name, $value)
-	{
-		$this->set($name, $value);
-	}
-
-	/**
-	 * Lets us add custom field settings to be used during the render process.
-	 *
-	 * @param  string $name Setting name
-	 * @param  array $arguments Setting value(s)
-	 *
-	 * @return \Iyoworks\FormBuilder\Field
-	 */
-	public function __call($name, $arguments)
-	{
-		if (method_exists($this, $name))
-		{
-			return call_user_func_array(array($this, $name), $arguments);
-		}
-
-		if (!sizeof($arguments))
-		{
-			$this->set($name, true);
-		}
-		elseif ($name == 'class')
-		{
-			$this->addClass($arguments);
-		}
-		elseif (sizeof($arguments) == 1)
-		{
-			$this->set($name, $arguments[0]);
-		}
-		else
-		{
-			$this->setProperty($name, $arguments);
-		}
-
-		return $this;
-	}
-
-	/**
 	 * Render the field
 	 *
 	 * @return string

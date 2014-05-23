@@ -765,20 +765,8 @@ class Form extends Element {
 			$type = lcfirst($matched[1]);
 			return $this->addDynamicField($type, $arguments);
 		}
-		if (!sizeof($arguments))
-		{
-			$this->set($name, true);
-		}
-		elseif ($name == 'class')
-		{
-			$this->addClass($arguments);
-		}
-		elseif (sizeof($arguments) == 1)
-		{
-			$this->setAttr($name, $arguments[0]);
-		}
 
-		return $this;
+		return parent::__call($name, $arguments);
 	}
 
 	/**
