@@ -59,6 +59,7 @@ class Form extends Element {
 		'action' => [],
 		'actionType' => 'url',
 		'fieldNames' => [],
+		'files' => false,
 		'rendererName' => null,
 		'allowFieldOverwrite' => false
 	);

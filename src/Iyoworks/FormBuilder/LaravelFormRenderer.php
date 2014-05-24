@@ -38,11 +38,12 @@ class LaravelFormRenderer implements FormRenderer {
 	public function formOpen(Form $form)
 	{
 		$options = $form->getAttributes();
-		if ($action = $form->getAction())
+		$options['files'] = $form->files;
+		if ($action = $form->action)
 		{
-			$options[$form->getActionType()] = $action;
+			$options[$form->actionType] = $action;
 		}
-		if ($model = $form->getModel())
+		if ($model = $form->model)
 		{
 			$html = $this->builder->model($model, $options);
 		}
