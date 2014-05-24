@@ -52,7 +52,6 @@ class Form extends Element {
 	protected $positions = [];
 
 	protected $properties = array(
-<<<<<<< HEAD
 		'skipAutoLabel' => ['hidden', 'submit', 'button', Field::RAW_FIELD_TYPE],
 		'autoLabels' => true,
 		'model' => null,
@@ -63,17 +62,6 @@ class Form extends Element {
 		'files' => false,
 		'rendererName' => null,
 		'allowFieldOverwrite' => false
-=======
-		 'skipAutoLabel' => ['hidden', 'submit', 'button', Field::RAW_FIELD_TYPE],
-		 'autoLabels' => true,
-		 'model' => null,
-		 'slugChar' => '_',
-		 'action' => [],
-		 'actionType' => 'url',
-		 'fieldNames' => [],
-		 'rendererName' => null,
-		 'allowFieldOverwrite' => false
->>>>>>> parent of bb4b014... labels and callbacks can be set when a field is created
 	);
 
 	/**
@@ -807,9 +795,13 @@ class Form extends Element {
 		{
 			$referenceField = Str::lower(preg_replace('/([A-Z])/', "{$this->slugChar}\$1", $referenceField));
 			if ($before)
+			{
 				$field = $this->addBefore($referenceField, $slug, $type);
+			}
 			else
+			{
 				$field = $this->addAfter($referenceField, $slug, $type);
+			}
 		}
 		else
 		{
