@@ -52,15 +52,15 @@ class Form extends Element {
 	protected $positions = [];
 
 	protected $properties = array(
-		 'skipAutoLabel' => ['hidden', 'submit', 'button', Field::RAW_FIELD_TYPE],
-		 'autoLabels' => true,
-		 'model' => null,
-		 'slugChar' => '_',
-		 'action' => [],
-		 'actionType' => 'url',
-		 'fieldNames' => [],
-		 'rendererName' => null,
-		 'allowFieldOverwrite' => false
+		'skipAutoLabel' => ['hidden', 'submit', 'button', Field::RAW_FIELD_TYPE],
+		'autoLabels' => true,
+		'model' => null,
+		'slugChar' => '_',
+		'action' => [],
+		'actionType' => 'url',
+		'fieldNames' => [],
+		'rendererName' => null,
+		'allowFieldOverwrite' => false
 	);
 
 	/**
@@ -132,33 +132,36 @@ class Form extends Element {
 	 * @param string $label
 	 * @param null $value
 	 * @param string $slug
+	 * @param \Closure $callback
 	 * @return Field
 	 */
-	public function addSubmit($label = 'Submit', $value = null, $slug = 'submit')
+	public function addSubmit($label = 'Submit', $value = null, $slug = 'submit', $callback = null)
 	{
-		$field = $this->add($slug, 'submit')->label($label)->value($value);
+		$field = $this->add($slug, 'submit', $label, $callback)->value($value);
 		return $field;
 	}
 
 	/**
 	 * @param string $slug
 	 * @param string $value
+	 * @param \Closure $callback
 	 * @return Field
 	 */
-	public function addHidden($slug, $value = null)
+	public function addHidden($slug, $value = null, $callback = null)
 	{
-		$field = $this->add($slug, 'hidden')->value($value)->container(false);
+		$field = $this->add($slug, 'hidden', null, $callback)->value($value)->container(false);
 		return $field;
 	}
 
 	/**
-	 * @param string $value
 	 * @param string $slug
+	 * @param string $value
+	 * @param \Closure $callback
 	 * @return Field
 	 */
-	public function addRaw($slug, $value)
+	public function addRaw($slug, $value, $callback = null)
 	{
-		$field = $this->add($slug, Field::RAW_FIELD_TYPE)->value($value)->container(false);
+		$field = $this->add($slug, Field::RAW_FIELD_TYPE, null, $callback)->value($value)->container(false);
 		return $field;
 	}
 
@@ -255,58 +258,57 @@ class Form extends Element {
 	 *
 	 * @param  string $slug Unique identifier for this field
 	 * @param  string $type Type of field
-	 *
-	 * @throws Exceptions\FieldAlreadyExists
+	 * @param string $label
+	 * @param \Closure $callback
 	 * @return \Iyoworks\FormBuilder\Field
 	 */
-	public function add($slug, $type = null)
+	public function add($slug, $type = null, $label = null, $callback = null)
 	{
-		return $this->addAtPosition(sizeof($this->fields), $slug, $type);
+		return $this->addAtPosition(sizeof($this->fields), $slug, $type, $label, $callback);
 	}
 
 	/**
 	 * Add a new field to the form
 	 *
-	 * @param  string $existingId slug of field to insert before
+	 * @param  string $existingSlug slug of field to insert before
 	 * @param  string $slug Unique identifier for this field
 	 * @param  string $type Type of field
-	 *
+	 * @param string $label
+	 * @param \Closure $callback
 	 * @throws Exceptions\FieldNotFound
-	 * @throws Exceptions\FieldAlreadyExists
 	 * @return \Iyoworks\FormBuilder\Field
 	 */
-	public function addBefore($existingId, $slug, $type = null)
+	public function addBefore($existingSlug, $slug, $type = null, $label = null, $callback = null)
 	{
-		$keyPosition = array_search($existingId, $this->positions);
+		$keyPosition = array_search($existingSlug, $this->positions);
 		if ($keyPosition == false)
 		{
-			throw new FieldNotFound("Field with slug '$existingId' does't exist.");
+			throw new FieldNotFound("Field with slug '$existingSlug' does not exist.");
 		}
 
-		return $this->addAtPosition($keyPosition, $slug, $type);
+		return $this->addAtPosition($keyPosition, $slug, $type, $label, $callback);
 	}
 
 	/**
 	 * Add a new field to the form
 	 *
-	 * @param  string $existingId slug of field to insert after
+	 * @param  string $existingSlug slug of field to insert after
 	 * @param  string $slug Unique identifier for this field
 	 * @param  string $type Type of field
-	 *
+	 * @param string $label
+	 * @param \Closure $callback
 	 * @throws Exceptions\FieldNotFound
-	 * @throws Exceptions\FieldAlreadyExists
 	 * @return \Iyoworks\FormBuilder\Field
-	 *
 	 */
-	public function addAfter($existingId, $slug, $type = null)
+	public function addAfter($existingSlug, $slug, $type = null, $label = null, $callback = null)
 	{
-		$keyPosition = array_search($existingId, $this->positions);
+		$keyPosition = array_search($existingSlug, $this->positions);
 		if ($keyPosition == false)
 		{
-			throw new FieldNotFound("Field with slug '$existingId' does't exist.");
+			throw new FieldNotFound("Field with slug '$existingSlug' does not exist.");
 		}
 
-		return $this->addAtPosition(++$keyPosition, $slug, $type);
+		return $this->addAtPosition(++$keyPosition, $slug, $type, $label, $callback);
 	}
 
 	/**
@@ -316,12 +318,13 @@ class Form extends Element {
 	 * @param  integer $position Array index position to add the field
 	 * @param  string $slug Unique identifier for this field
 	 * @param  string $type Type of field, defaults to 'text'
-	 *
+	 * @param  string $label
+	 * @param  \Closure $callback
 	 * @throws Exceptions\UnknownType
 	 * @throws Exceptions\FieldAlreadyExists
 	 * @return \Iyoworks\FormBuilder\Field
 	 */
-	protected function addAtPosition($position, $slug, $type = null)
+	protected function addAtPosition($position, $slug, $type = null, $label = null, \Closure $callback = null)
 	{
 		if (isset($this->fields[$slug]) && !$this->allowFieldOverwrite)
 		{
@@ -333,25 +336,51 @@ class Form extends Element {
 		{
 			throw new UnknownType($type);
 		}
-		$field = new Field($this, $slug, $type);
-		$field->row = 'row-' . count($this->fields) * rand(1, 10) . count($this->fields);
-		if ($this->autoLabels && !in_array($field->type, $this->skipAutoLabel) && is_null($field->label))
+
+		if ($label instanceof \Closure)
 		{
-			$field->label = Str::title(str_replace('_', ' ', $field->slug));
+			$callback = $label;
+			$label = null;
 		}
+
+		$field = $this->makeField($slug, $type);
+		$this->generateDefaultRowId($field);
+		$this->generateLabel($label, $field);
 		$this->fire('newField', $field);
 		$this->fire('new' . Str::studly($field->type) . 'Field', $field);
-		if (!empty($this->buffers))
+		$this->applyBuffersToField($field);
+		$this->setField($position, $field);
+		if ($callback)
 		{
-			foreach ($this->buffers as $k => $buffer)
-			{
-				$buffer[] = $field;
-				$this->buffers[$k] = $buffer;
-			}
+			call_user_func($callback, $field);
+			return $this;
 		}
-		$this->fields[$field->slug] = $field;
-		$this->positions = ArrayHelper::insert($this->positions, [$position => $field->slug], $position);
 		return $field;
+	}
+
+	/**
+	 * @param string $type
+	 * @param array $arguments
+	 * @param null $referenceField
+	 * @param bool $before
+	 * @return Field
+	 */
+	protected function addDynamicField($type, $arguments, $referenceField = null, $before = false)
+	{
+		$slug = array_get($arguments, 0);
+		$label = array_get($arguments, 1);
+		$callback = array_get($arguments, 2);
+
+		if ($referenceField)
+		{
+			$referenceField = Str::lower(preg_replace('/([A-Z])/', "{$this->slugChar}\$1", $referenceField));
+			if ($before)
+			{
+				return $this->addBefore($referenceField, $slug, $type, $label, $callback);
+			}
+			return $this->addAfter($referenceField, $slug, $type, $label, $callback);
+		}
+		return $this->add($slug, $type, $label, $callback);
 	}
 
 	/**
@@ -368,7 +397,6 @@ class Form extends Element {
 		{
 			throw new FieldNotFound("Field with slug '$slug' does't exist.");
 		}
-
 		return $this->fields[$slug];
 	}
 
@@ -392,27 +420,6 @@ class Form extends Element {
 	{
 		return isset($this->fields[$slug]);
 	}
-
-//	/**
-//	 * @param string $slug
-//	 * @param string|int $position slug of an existing field or an integer
-//	 */
-//	public function move($slug, $position)
-//	{
-//		if (is_int($position))
-//		{
-//			$pos = $position;
-//		}
-//		else
-//		{
-//			$pos = array_search($this->positions, $slug);
-//				if ($pos == false)
-//				{
-//					throw new FieldNotFound($position);
-//				}
-//		}
-//		ArrayHelper::insert($this->positions, [$position => $slug], $pos);
-//	}
 
 	/**
 	 * Remove a field from the form by slug
@@ -508,8 +515,84 @@ class Form extends Element {
 				$output .= $this->renderFields($fields['_default']);
 			}
 		}
+		return $output;
+	}
+
+	/**
+	 * Render a list of fields.
+	 * @param Element $row
+	 * @param array|Field[] $fields
+	 * @return string
+	 */
+	protected function renderRow($row, $fields)
+	{
+		$count = count($fields);
+		$output = $this->fire('beforeRow', $row, $fields);
+		$output .= $this->getRenderer()->rowOpen($row, $fields);
+		$output .= $this->renderFields($fields, function ($field) use ($row, $count)
+		{
+			$field->setProperty('rowSize', $count);
+		});
+		$output .= $this->getRenderer()->rowClose($row, $fields);
+		$output .= $this->fire('afterRow', $row, $fields);
+		return $output;
+	}
+
+	/**
+	 * Render a given field.
+	 *
+	 * @param  Field $field
+	 *
+	 * @return string
+	 */
+	public function renderField(Field $field)
+	{
+		$output = '';
+
+		if ($this->fieldNames)
+		{
+			$field->addName($this->fieldNames, true);
+		}
+
+		$output .= $this->fire('beforeField', $this, $field);
+
+		if ($field->type == Field::RAW_FIELD_TYPE)
+		{
+			$fieldHtml = $field->value;
+		}
+		elseif ($this->manager->isMacro($field->type))
+		{
+			$fieldHtml = $this->manager->callMacro($field->type, $field, $this->getRenderer());
+		}
+		else
+		{
+			$fieldHtml = $this->getRenderer()->field($field);
+		}
+
+		$output .= $fieldHtml;
+
+		$output .= $this->fire('afterField', $this, $field);
 
 		return $output;
+	}
+
+	/**
+	 * Render a list of fields.
+	 *
+	 * @param  array|Field[] $fields
+	 * @param callable $callable
+	 * @return string
+	 */
+	protected function renderFields($fields, callable $callable = null)
+	{
+		$outputs = [];
+		foreach ($this->getOrderedFields($fields) as $field)
+		{
+			if ($field->skip) continue;
+			if ($callable) call_user_func($callable, $field);
+			$outputs[] = $this->renderField($field);
+		}
+		return join("\n", $outputs);
 	}
 
 	/**
@@ -556,80 +639,22 @@ class Form extends Element {
 	}
 
 	/**
-	 * Render a list of fields.
-	 * @param Element $row
 	 * @param array|Field[] $fields
-	 * @return string
+	 * @return array|Field[]
 	 */
-	protected function renderRow($row, $fields)
+	public function getOrderedFields(array $fields = null)
 	{
-		$count = count($fields);
-		$output = $this->fire('beforeRow', $row, $fields);
-		$output .= $this->getRenderer()->rowOpen($row, $fields);
-		$output .= $this->renderFields($fields, function ($field) use ($row, $count)
+		if (!$fields) $fields = $this->fields;
+		$keys = array_keys($fields);
+		$positions = array_intersect($this->positions, $keys);
+		if ($keys == $positions) return $fields;
+		$_fields = [];
+		foreach ($positions as $field)
 		{
-			$field->setProperty('rowSize', $count);
-		});
-		$output .= $this->getRenderer()->rowClose($row, $fields);
-		$output .= $this->fire('afterRow', $row, $fields);
-		return $output;
-	}
-
-	/**
-	 * Render a list of fields.
-	 *
-	 * @param  array|Field[] $fields
-	 * @param callable $callable
-	 * @return string
-	 */
-	protected function renderFields($fields, callable $callable = null)
-	{
-		$outputs = [];
-		foreach ($this->getOrderedFields($fields) as $field)
-		{
-			if ($field->skip) continue;
-			if ($callable) call_user_func($callable, $field);
-			$outputs[] = $this->renderField($field);
-		}
-		return join("\n", $outputs);
-	}
-
-	/**
-	 * Render a given field.
-	 *
-	 * @param  Field $field
-	 *
-	 * @return string
-	 */
-	public function renderField(Field $field)
-	{
-		$output = '';
-
-		if ($this->fieldNames)
-		{
-			$field->addName($this->fieldNames, true);
+			$_fields[$field] = $this->fields[$field];
 		}
 
-		$output .= $this->fire('beforeField', $this, $field);
-
-		if ($field->type == Field::RAW_FIELD_TYPE)
-		{
-			$fieldHtml = $field->value;
-		}
-		elseif ($this->manager->isMacro($field->type))
-		{
-			$fieldHtml = $this->manager->callMacro($field->type, $field, $this->getRenderer());
-		}
-		else
-		{
-			$fieldHtml = $this->getRenderer()->field($field);
-		}
-
-		$output .= $fieldHtml;
-
-		$output .= $this->fire('afterField', $this, $field);
-
-		return $output;
+		return $_fields;
 	}
 
 	/**
@@ -669,22 +694,6 @@ class Form extends Element {
 	public function getFields()
 	{
 		return new Collection($this->fields);
-	}
-
-	/**
-	 * @return array|string
-	 */
-	public function getAction()
-	{
-		return $this->action;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getActionType()
-	{
-		return $this->actionType;
 	}
 
 	/**
@@ -781,51 +790,62 @@ class Form extends Element {
 	}
 
 	/**
-	 * @param string $type
-	 * @param array $arguments
-	 * @param null $referenceField
-	 * @param bool $before
-	 * @return Field
+	 * @param $label
+	 * @param $field
 	 */
-	public function addDynamicField($type, $arguments, $referenceField = null, $before = false)
+	protected function generateLabel($label, $field)
 	{
-		$slug = array_get($arguments, 0);
-		if ($referenceField)
-		{
-			$referenceField = Str::lower(preg_replace('/([A-Z])/', "{$this->slugChar}\$1", $referenceField));
-			if ($before)
-				$field = $this->addBefore($referenceField, $slug, $type);
-			else
-				$field = $this->addAfter($referenceField, $slug, $type);
-		}
-		else
-		{
-			$field = $this->add($slug, $type);
-		}
-		$label = array_get($arguments, 1);
 		if ($label)
 		{
 			$field->label($label);
 		}
+		elseif ($this->autoLabels && !in_array($field->type, $this->skipAutoLabel))
+		{
+			$field->label = Str::title(str_replace('_', ' ', $field->slug));
+		}
+	}
+
+	/**
+	 * @param $field
+	 */
+	protected function generateDefaultRowId($field)
+	{
+		$field->row = 'row-' . max(count($this->fields), 1) . str_replace('.', '', microtime(true));
+	}
+
+	/**
+	 * @param $field
+	 */
+	protected function applyBuffersToField($field)
+	{
+		if (!empty($this->buffers))
+		{
+			foreach ($this->buffers as $k => $buffer)
+			{
+				$buffer[] = $field;
+				$this->buffers[$k] = $buffer;
+			}
+		}
+	}
+
+	/**
+	 * @param $slug
+	 * @param $type
+	 * @return Field
+	 */
+	protected function makeField($slug, $type)
+	{
+		$field = new Field($this, $slug, $type);
 		return $field;
 	}
 
 	/**
-	 * @param array|Field[] $fields
-	 * @return array|Field[]
+	 * @param $position
+	 * @param $field
 	 */
-	public function getOrderedFields(array $fields = null)
+	public function setField($position, $field)
 	{
-		if (!$fields) $fields = $this->fields;
-		$keys = array_keys($fields);
-		$positions = array_intersect($this->positions, $keys);
-		if ($keys == $positions) return $fields;
-		$_fields = [];
-		foreach ($positions as $field)
-		{
-			$_fields[$field] = $this->fields[$field];
-		}
-
-		return $_fields;
+		$this->fields[$field->slug] = $field;
+		$this->positions = ArrayHelper::insert($this->positions, [$position => $field->slug], $position);
 	}
 }
