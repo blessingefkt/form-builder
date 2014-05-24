@@ -45,8 +45,11 @@ $form->remove('gender');
 Add fields exactly where you want them
 
 ```php
-$form->addAfter('first_name', 'last_name')->...; // Add last name after first name
-$form->addBefore('last_name', 'first_name')->...; // Add first name before last name
+// Add last name after first name
+$form->addAfter('first_name', 'last_name', 'text');
+$form->addTextAfterFirstName('last_name');
+$form->addBefore('last_name', 'first_name', 'text');
+$form->addTextAfterLastName('first_name');
 ```
 
 Closures are also supported
@@ -125,12 +128,12 @@ FormBuilder::bind('beforeField', function(Form $form, Field $field) {
         return $output . '</div>';
 	});
 $form = FormBuilder::form(function(Form $form) {
-    $form->route('user.create')
-	$form->addText('first_name')->label('First Name');
+    $form->route('user.create');
+	$form->addText('first_name', 'First Name');
 	$form->addText('last_name')->label('Last Name');
 });
 
-echo $form->html($model);
+echo $form->model($model)->html();
 ```
 
 ### License
