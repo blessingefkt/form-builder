@@ -30,7 +30,6 @@ class Field extends Element {
 	 */
 	protected $slug;
 	protected $properties = array(
-		 'name' => null,
 		 'type' => null,
 		 'label' => null,
 		 'description' => null,
