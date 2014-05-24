@@ -98,8 +98,8 @@ Callbacks can be used to render your form exactly the way you want it to look.
 Supported callbacks include:
 
 ```php
-beforeForm(Form $form, array $tabs)
-afterForm(Form $form, array $tabs)
+beforeForm(Form $form)
+afterForm(Form $form)
 beforeField(Form $form, Field $field)
 afterField(Form $form, Field $field)
 ```
@@ -108,7 +108,7 @@ They can be used on a per-form basis
 
 ```php
 // Per-form Callbacks
-$form->bind('beforeField', function(Form $form, Field $field) {
+$form->beforeField(function(Form $form, Field $field) {
 	// Use field settings to display your form nicely
 	return '<label>' . $field->label . '</label>';
 });
