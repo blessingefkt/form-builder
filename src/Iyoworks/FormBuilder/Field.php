@@ -30,15 +30,15 @@ class Field extends Element {
 	 */
 	protected $slug;
 	protected $properties = array(
-		 'type' => null,
-		 'label' => null,
-		 'description' => null,
-		 'options' => [],
-		 'row' => null,
-		 'rowSize' => 0,
-		 'value' => null,
-		 'skip' => false,
-		 'baseNames' => [],
+		'type' => null,
+		'label' => null,
+		'description' => null,
+		'options' => [],
+		'row' => null,
+		'rowSize' => 0,
+		'value' => null,
+		'skip' => false,
+		'baseNames' => [],
 	);
 	/**
 	 * @var Form
@@ -131,17 +131,27 @@ class Field extends Element {
 		return $this;
 	}
 
+	public function getAttr($key, $default = null)
+	{
+		if ($key == 'name')
+		{
+			return $this->makeName(parent::getAttr($key, $default));
+		}
+		return parent::getAttr($key, $default);
+	}
+
+
 	/**
 	 * @param $value
 	 * @return string
 	 */
-	protected function onGetName($value)
+	protected function makeName($value)
 	{
 		if ($value === false)
 		{
 			return null;
 		}
-		if (is_null($value))
+		elseif (is_null($value))
 		{
 			$value = $this->slug;
 		}
