@@ -324,32 +324,21 @@ class Form extends Element {
 	 */
 	protected function addAtPosition($position, $slug, $type = null)
 	{
-		if (isset($this->fields[$slug]) && !$this->allowFieldOverwrite)
-		{
-			throw new FieldAlreadyExists("Field with slug '$slug' has already been added to this form.");
-		}
-
+		$this->fieldExistenceCheck($slug);
 		if (is_null($type)) $type = 'text';
 		if (!$this->isValidType($type))
 		{
 			throw new UnknownType($type);
 		}
 		$field = new Field($this, $slug, $type);
-		$field->row = 'row-' . count($this->fields) * rand(1, 10) . count($this->fields);
-		if ($this->autoLabels && !in_array($field->type, $this->skipAutoLabel) && is_null($field->label))
+		$this->generateDefaultRowId($field);
+		if ($this->autoLabels)
 		{
-			$field->label = Str::title(str_replace('_', ' ', $field->slug));
+			$this->generateAutoLabel($field);
 		}
 		$this->fire('newField', $field);
 		$this->fire('new' . Str::studly($field->type) . 'Field', $field);
-		if (!empty($this->buffers))
-		{
-			foreach ($this->buffers as $k => $buffer)
-			{
-				$buffer[] = $field;
-				$this->buffers[$k] = $buffer;
-			}
-		}
+		$this->applyBuffersToField($field);
 		$this->fields[$field->slug] = $field;
 		$this->positions = ArrayHelper::insert($this->positions, [$position => $field->slug], $position);
 		return $field;
@@ -832,5 +821,51 @@ class Form extends Element {
 		}
 
 		return $_fields;
+	}
+
+	/**
+	 * @param $field
+	 */
+	protected function generateDefaultRowId($field)
+	{
+		$field->row = 'row-' . count($this->fields) * rand(1, 10) . count($this->fields);
+	}
+
+	/**
+	 * @param $field
+	 */
+	protected function generateAutoLabel($field)
+	{
+		if (!in_array($field->type, $this->skipAutoLabel) && is_null($field->label))
+		{
+			$field->label = Str::title(str_replace('_', ' ', $field->slug));
+		}
+	}
+
+	/**
+	 * @param $field
+	 */
+	protected function applyBuffersToField($field)
+	{
+		if (!empty($this->buffers))
+		{
+			foreach ($this->buffers as $k => $buffer)
+			{
+				$buffer[] = $field;
+				$this->buffers[$k] = $buffer;
+			}
+		}
+	}
+
+	/**
+	 * @param $slug
+	 * @throws Exceptions\FieldAlreadyExists
+	 */
+	protected function fieldExistenceCheck($slug)
+	{
+		if (isset($this->fields[$slug]) && !$this->allowFieldOverwrite)
+		{
+			throw new FieldAlreadyExists("Field with slug '$slug' has already been added to this form.");
+		}
 	}
 }
