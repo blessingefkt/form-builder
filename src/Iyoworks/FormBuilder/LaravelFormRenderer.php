@@ -14,6 +14,7 @@ class LaravelFormRenderer implements FormRenderer {
 	 * @var \Illuminate\Html\HtmlBuilder
 	 */
 	private $htmlBuilder;
+	private $formData = [];
 
 	public function __construct(Builder $builder, HtmlBuilder $htmlBuilder)
 	{
@@ -46,6 +47,7 @@ class LaravelFormRenderer implements FormRenderer {
 		if ($model = $form->model)
 		{
 			$html = $this->builder->model($model, $options);
+			$this->formData = array_dot($model->toArray());
 		}
 		else
 		{
@@ -60,6 +62,7 @@ class LaravelFormRenderer implements FormRenderer {
 	 */
 	public function formClose(Form $form)
 	{
+		$this->formData = [];
 		return $this->builder->close();
 	}
 
@@ -92,6 +95,14 @@ class LaravelFormRenderer implements FormRenderer {
 	 */
 	public function field(Field $field)
 	{
+		if (!$field->value)
+		{
+			if ($this->formData)
+			{
+				$dotName = $this->convertArraySyntaxToDotSyntax($field->name);
+				$field->value(array_get($this->formData, $dotName));
+			}
+		}
 		if (!$this->isValidType($field->type))
 		{
 			return $this->inputField($field);
@@ -288,6 +299,11 @@ class LaravelFormRenderer implements FormRenderer {
 			$value = $field->value;
 		}
 		return $this->builder->button($value, $attributes);
+	}
+
+	protected function convertArraySyntaxToDotSyntax($str)
+	{
+		return str_replace(['[', ']'], ['.', ''], $str);
 	}
 
 } 

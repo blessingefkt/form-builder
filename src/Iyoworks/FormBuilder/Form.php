@@ -76,6 +76,7 @@ class Form extends Element {
 		parent::__construct($attributes, $properties);
 		$this->manager = $manager;
 		$this->rendererName = $rendererName;
+		$this->setAttr('id', 'form-'.Str::random(8));
 		$this->method('post');
 	}
 
