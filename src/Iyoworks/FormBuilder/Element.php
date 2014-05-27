@@ -6,4 +6,20 @@
  */
 class Element extends \Iyoworks\Html\Element {
 
+	/**
+	 * @return string
+	 */
+	public function dotName()
+	{
+		return $this->convertArraySyntaxToDotSyntax($this->name);
+	}
+
+	/**
+	 * @param $str
+	 * @return string
+	 */
+	protected function convertArraySyntaxToDotSyntax($str)
+	{
+		return str_replace(['[', ']'], ['.', ''], $str);
+	}
 }

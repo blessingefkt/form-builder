@@ -17,12 +17,14 @@ use Iyoworks\FormBuilder\Helpers\ArrayHelper;
  * @method $this rendererName()   rendererName(string $value)
  * @method $this autoLabels()      autoLabels(bool $value)
  * @method $this skipAutoLabel()      autoLabels(array $value)
+ * @method $this fillData()         fillData(array $values)
  * @method $this allowFieldOverwrite()   allowFieldOverwrite(bool $value)
  * @property bool $autoLabels
  * @property \Illuminate\Database\Eloquent\Model|\stdClass $model
  * @property string|array $action
  * @property string $actionType
  * @property array $fieldNames
+ * @property array $fillData
  * @property array $skipAutoLabel
  * @property string $rendererName
  * @property bool $allowFieldOverwrite
@@ -59,6 +61,7 @@ class Form extends Element {
 		'action' => [],
 		'actionType' => 'url',
 		'fieldNames' => [],
+		'fillData' => [],
 		'files' => false,
 		'rendererName' => null,
 		'allowFieldOverwrite' => false
@@ -601,6 +604,11 @@ class Form extends Element {
 			$field->addName($this->fieldNames, true);
 		}
 
+		if (is_null($field->value))
+		{
+			$field->value = array_get($this->fillData, $field->dotName());
+		}
+
 		$output .= $this->fire('beforeField', $this, $field);
 
 		if ($field->type == Field::RAW_FIELD_TYPE)
@@ -822,6 +830,21 @@ class Form extends Element {
 		}
 
 		return $_fields;
+	}
+
+	/**
+	 * @param array $values
+	 * @param string $key
+	 * @return $this
+	 */
+	public function fill(array $values, $key = null)
+	{
+		if ($key)
+		{
+			$values = array_dot([$key => $values]);
+		}
+		$this->fillData = array_merge($this->fillData, $values);
+		return $this;
 	}
 
 	/**

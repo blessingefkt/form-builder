@@ -47,7 +47,7 @@ class LaravelFormRenderer implements FormRenderer {
 		if ($model = $form->model)
 		{
 			$html = $this->builder->model($model, $options);
-			$this->formData = array_dot($model->toArray());
+			$form->fill(array_dot($model->toArray()));
 		}
 		else
 		{
@@ -299,11 +299,6 @@ class LaravelFormRenderer implements FormRenderer {
 			$value = $field->value;
 		}
 		return $this->builder->button($value, $attributes);
-	}
-
-	protected function convertArraySyntaxToDotSyntax($str)
-	{
-		return str_replace(['[', ']'], ['.', ''], $str);
 	}
 
 } 
