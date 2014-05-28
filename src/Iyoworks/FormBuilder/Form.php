@@ -157,12 +157,18 @@ class Form extends Element {
 	}
 
 	/**
+	 * Accepts a value or a slug and value
 	 * @param string $value
 	 * @param string $slug
 	 * @return Field
 	 */
-	public function addRaw($slug, $value)
+	public function addRaw($slug, $value = null)
 	{
+		if (is_null($value))
+		{
+			$value = $slug;
+			$slug = 'raw_'.Str::random(8);
+		}
 		$field = $this->add($slug, Field::RAW_FIELD_TYPE)->value($value)->container(false);
 		return $field;
 	}
