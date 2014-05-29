@@ -446,6 +446,20 @@ class Form extends Element {
 	}
 
 	/**
+	 * Set a form field value for filling
+	 * @param $key
+	 * @param $value
+	 * @return $this
+	 */
+	public function value($key, $value)
+	{
+		$array = $this->fillData;
+		$array[$key] = $value;
+		$this->fillData = $array;
+		return $this;
+	}
+
+	/**
 	 * Render to form's opening tag
 	 * @param array $attributes
 	 * @return string
