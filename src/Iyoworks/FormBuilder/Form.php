@@ -610,9 +610,9 @@ class Form extends Element {
 			$field->addName($this->fieldNames, true);
 		}
 
-		if (is_null($field->value))
+		if ($_value = array_get($this->fillData, $field->dotName()))
 		{
-			$field->value = array_get($this->fillData, $field->dotName());
+			$field->value($_value);
 		}
 
 		$output .= $this->fire('beforeField', $this, $field);
