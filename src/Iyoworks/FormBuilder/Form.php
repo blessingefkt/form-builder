@@ -537,7 +537,7 @@ class Form extends Element {
 	 */
 	public function getFieldsByRow($default = '_default')
 	{
-		$sorted = $this->getFieldsByProperty('row', $default);
+		$sorted = $this->_getFieldsByProperty('row', $default);
 		return $sorted;
 	}
 
@@ -556,7 +556,7 @@ class Form extends Element {
 	 *   ...
 	 * ]
 	 */
-	protected function getFieldsByProperty($property, $default = '')
+	protected function _getFieldsByProperty($property, $default = '')
 	{
 		$sorted = array();
 
@@ -567,6 +567,16 @@ class Form extends Element {
 		}
 
 		return $sorted;
+	}
+
+	/**
+	 * @param $property
+	 * @param string $default
+	 * @return Collection|Field[]
+	 */
+	public function getFieldsByProperty($property, $default = '')
+	{
+		return new Collection($this->_getFieldsByProperty($property, $default));
 	}
 
 	/**
