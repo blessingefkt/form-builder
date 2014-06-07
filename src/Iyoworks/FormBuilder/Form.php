@@ -79,7 +79,7 @@ class Form extends Element {
 		parent::__construct($attributes, $properties);
 		$this->manager = $manager;
 		$this->rendererName = $rendererName;
-		$this->setAttr('id', 'form-'.Str::random(8));
+		$this->setAttr('id', 'form-' . Str::random(8));
 		$this->method('post');
 	}
 
@@ -95,7 +95,7 @@ class Form extends Element {
 		if (is_null($rowId)) $rowId = 'row-' . Str::random(8);
 		$row = new Element(['id' => $rowId]);
 		$row->addClass('field-row');
-		$this->buffer(['row' => $rowId], $closure, [$row]);
+		$this->buffer(['row' => $rowId], $closure, null, [$row]);
 		return $this->rows[$rowId] = $row;
 	}
 
@@ -103,9 +103,10 @@ class Form extends Element {
 	 * @param array $properties
 	 * @param callable $callable
 	 * @param array $passIn
+	 * @param callable $fieldsCallable
 	 * @return $this
 	 */
-	public function buffer(array $properties, callable $callable, array $passIn = [])
+	public function buffer(array $properties, callable $callable, callable $fieldsCallable = null,  array $passIn = [])
 	{
 		$bufferId = count($this->buffers) + 1;
 		$this->buffers[$bufferId] = [];
@@ -116,6 +117,7 @@ class Form extends Element {
 		{
 			$field->setProperties($properties);
 		}
+		if ($fieldsCallable) $fieldsCallable($fields);
 		return $this;
 	}
 
@@ -167,7 +169,7 @@ class Form extends Element {
 		if (is_null($value))
 		{
 			$value = $slug;
-			$slug = 'raw_'.Str::random(8);
+			$slug = 'raw_' . Str::random(8);
 		}
 		$field = $this->add($slug, Field::RAW_FIELD_TYPE)->value($value)->container(false);
 		return $field;
@@ -577,6 +579,25 @@ class Form extends Element {
 	public function getFieldsByProperty($property, $default = '')
 	{
 		return new Collection($this->_getFieldsByProperty($property, $default));
+	}
+
+	/**
+	 * @param $property
+	 * @param $value
+	 * @return Collection|Field[]
+	 */
+	public function getFieldsWithProperty($property, $value)
+	{
+		$sorted = array();
+
+		foreach ($this->getOrderedFields() as $field)
+		{
+			if ($field->getProperty($property) == $value)
+			{
+				$sorted[$field->slug] = $field;
+			}
+		}
+		return new Collection($sorted);
 	}
 
 	/**
