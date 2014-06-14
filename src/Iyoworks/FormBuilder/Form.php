@@ -106,7 +106,7 @@ class Form extends Element {
 	 * @param callable $fieldsCallable
 	 * @return $this
 	 */
-	public function buffer(array $properties, callable $callable, callable $fieldsCallable = null,  array $passIn = [])
+	public function buffer(array $properties, callable $callable, callable $fieldsCallable = null, array $passIn = [])
 	{
 		$bufferId = count($this->buffers) + 1;
 		$this->buffers[$bufferId] = [];
@@ -856,10 +856,10 @@ class Form extends Element {
 		{
 			$field = $this->add($slug, $type);
 		}
-		$label = array_get($arguments, 1);
-		if ($label)
+
+		if (array_key_exists($arguments, 1))
 		{
-			$field->label($label);
+			$field->label(array_get($arguments, 1));
 		}
 		return $field;
 	}
