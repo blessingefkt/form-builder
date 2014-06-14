@@ -857,7 +857,7 @@ class Form extends Element {
 			$field = $this->add($slug, $type);
 		}
 
-		if (array_key_exists($arguments, 1))
+		if (array_key_exists(1, $arguments))
 		{
 			$field->label(array_get($arguments, 1));
 		}
