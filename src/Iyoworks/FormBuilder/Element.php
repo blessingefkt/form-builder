@@ -20,6 +20,6 @@ class Element extends \Iyoworks\Html\Element {
 	 */
 	protected function convertArraySyntaxToDotSyntax($str)
 	{
-		return str_replace(['[', ']'], ['.', ''], $str);
+		return trim(str_replace(['[', ']'], ['.', ''], $str), '.');
 	}
 }
