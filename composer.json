@@ -18,14 +18,14 @@
     "require": {
         "php": ">=5.3.0",
         "illuminate/support": "~4",
-        "iyoworks/html": "dev-master"
+        "iyoworks/html": "~1"
     },
     "require-dev": {
 
     },
     "autoload": {
         "psr-4": {
-            "Iyoworks\\FormBuilder\\": "src/Iyoworks/FormBuilder"
+            "Iyoworks\\FormBuilder\\": "src"
         }
     },
     "minimum-stability": "dev"
