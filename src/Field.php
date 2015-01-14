@@ -155,11 +155,16 @@ class Field extends Element {
 		{
 			$value = $this->slug;
 		}
-		$nameArray = explode('.', $value);
-		$baseNames = $this->getProperty('baseNames');
-		if ($baseNames === false) $baseNames = [];
-		$nameArray = array_merge($baseNames, $nameArray);
-		return $value = $this->makeFieldName($value, $nameArray, $this->multiple);
+		$baseNames = $this->getProperty('baseNames', []);
+		if ($baseNames === false)
+		{
+			$baseNames = [];
+		}
+		elseif (!is_array($baseNames))
+		{
+			$baseNames = [$baseNames];
+		}
+		return $value = $this->makeFieldName($value, $baseNames, $this->multiple);
 	}
 
 	/**
